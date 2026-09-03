@@ -9,7 +9,7 @@ export default function Index() {
         Edit app/index.tsx to edit this screen.
       </Text>
 
-      <Text>nigga</Text>
+      <Text>hello</Text>
       <TouchableOpacity onPress={toggleDarkMode}>
         <Text>toggle the mode</Text>
       </TouchableOpacity>
