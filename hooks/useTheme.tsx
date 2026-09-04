@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
-// AsyncStorage is React Native’s simple, promise-based API for persisting small bits of data on a user’s device. Think of it as the mobile-app equivalent of the browser’s localStorage, but asynchronous and cross-platform.
+// AsyncStorage is React Native's simple, promise-based API for persisting small bits of data on a user's device.
 
 export interface ColorScheme {
   bg: string;
@@ -32,16 +32,18 @@ export interface ColorScheme {
   isDark: boolean;
 }
 
+export type ThemeAccent = "default" | "duolingo" | "instagram";
+export type ThemeMode = "light" | "dark";
+/** @deprecated old combined theme identifier, kept only for migrating existing saved values */
 export type ThemeName = "light" | "dark" | "duolingo" | "instagram";
 
-export const THEME_OPTIONS: { name: ThemeName; label: string }[] = [
-  { name: "light", label: "Light" },
-  { name: "dark", label: "Dark" },
+export const ACCENT_OPTIONS: { name: ThemeAccent; label: string }[] = [
+  { name: "default", label: "Default" },
   { name: "duolingo", label: "Duolingo" },
   { name: "instagram", label: "Instagram" },
 ];
 
-const lightColors: ColorScheme = {
+const defaultLight: ColorScheme = {
   bg: "#f8fafc",
   surface: "#ffffff",
   text: "#1e293b",
@@ -62,15 +64,12 @@ const lightColors: ColorScheme = {
     muted: ["#9ca3af", "#6b7280"],
     empty: ["#f3f4f6", "#e5e7eb"],
   },
-  backgrounds: {
-    input: "#ffffff",
-    editInput: "#ffffff",
-  },
+  backgrounds: { input: "#ffffff", editInput: "#ffffff" },
   statusBarStyle: "dark-content",
   isDark: false,
 };
 
-const darkColors: ColorScheme = {
+const defaultDark: ColorScheme = {
   bg: "#0f172a",
   surface: "#1e293b",
   text: "#f1f5f9",
@@ -91,16 +90,13 @@ const darkColors: ColorScheme = {
     muted: ["#374151", "#4b5563"],
     empty: ["#374151", "#4b5563"],
   },
-  backgrounds: {
-    input: "#1e293b",
-    editInput: "#0f172a",
-  },
+  backgrounds: { input: "#1e293b", editInput: "#0f172a" },
   statusBarStyle: "light-content",
   isDark: true,
 };
 
 // Bright, playful green — inspired by Duolingo's owl-and-leaf palette.
-const duolingoColors: ColorScheme = {
+const duolingoLight: ColorScheme = {
   bg: "#fffcf5",
   surface: "#ffffff",
   text: "#3c3c3c",
@@ -121,16 +117,39 @@ const duolingoColors: ColorScheme = {
     muted: ["#e5e5e5", "#cccccc"],
     empty: ["#f7f7f7", "#e5e5e5"],
   },
-  backgrounds: {
-    input: "#ffffff",
-    editInput: "#ffffff",
-  },
+  backgrounds: { input: "#ffffff", editInput: "#ffffff" },
   statusBarStyle: "dark-content",
   isDark: false,
 };
 
+const duolingoDark: ColorScheme = {
+  bg: "#131f24",
+  surface: "#1c2b32",
+  text: "#f1f9ec",
+  textMuted: "#8ba39a",
+  border: "#2c414a",
+  primary: "#89e219",
+  success: "#89e219",
+  warning: "#ffc800",
+  danger: "#ff6b6b",
+  shadow: "#000000",
+  gradients: {
+    background: ["#131f24", "#1c2b32"],
+    surface: ["#1c2b32", "#22343c"],
+    primary: ["#58cc02", "#89e219"],
+    success: ["#58cc02", "#89e219"],
+    warning: ["#ffc800", "#ffe066"],
+    danger: ["#ff4b4b", "#ff6b6b"],
+    muted: ["#2c414a", "#3a5560"],
+    empty: ["#22343c", "#2c414a"],
+  },
+  backgrounds: { input: "#1c2b32", editInput: "#131f24" },
+  statusBarStyle: "light-content",
+  isDark: true,
+};
+
 // Warm sunset gradient — inspired by Instagram's brand palette.
-const instagramColors: ColorScheme = {
+const instagramLight: ColorScheme = {
   bg: "#fafafa",
   surface: "#ffffff",
   text: "#262626",
@@ -151,72 +170,131 @@ const instagramColors: ColorScheme = {
     muted: ["#dbdbdb", "#c7c7c7"],
     empty: ["#f5f5f5", "#e5e5e5"],
   },
-  backgrounds: {
-    input: "#fafafa",
-    editInput: "#ffffff",
-  },
+  backgrounds: { input: "#fafafa", editInput: "#ffffff" },
   statusBarStyle: "dark-content",
   isDark: false,
 };
 
-const themes: Record<ThemeName, ColorScheme> = {
-  light: lightColors,
-  dark: darkColors,
-  duolingo: duolingoColors,
-  instagram: instagramColors,
+const instagramDark: ColorScheme = {
+  bg: "#000000",
+  surface: "#121212",
+  text: "#fafafa",
+  textMuted: "#a8a8a8",
+  border: "#262626",
+  primary: "#e1306c",
+  success: "#4caf50",
+  warning: "#fcaf45",
+  danger: "#ed4956",
+  shadow: "#000000",
+  gradients: {
+    background: ["#000000", "#121212"],
+    surface: ["#121212", "#1a1a1a"],
+    primary: ["#833ab4", "#fd1d1d"],
+    success: ["#4caf50", "#2e7d32"],
+    warning: ["#f77737", "#fcaf45"],
+    danger: ["#fd1d1d", "#c13584"],
+    muted: ["#262626", "#363636"],
+    empty: ["#1a1a1a", "#262626"],
+  },
+  backgrounds: { input: "#121212", editInput: "#000000" },
+  statusBarStyle: "light-content",
+  isDark: true,
+};
+
+const palettes: Record<ThemeAccent, Record<ThemeMode, ColorScheme>> = {
+  default: { light: defaultLight, dark: defaultDark },
+  duolingo: { light: duolingoLight, dark: duolingoDark },
+  instagram: { light: instagramLight, dark: instagramDark },
 };
 
 interface ThemeContextType {
-  themeName: ThemeName;
-  setThemeName: (name: ThemeName) => void;
+  accent: ThemeAccent;
+  mode: ThemeMode;
+  setAccent: (accent: ThemeAccent) => void;
+  setMode: (mode: ThemeMode) => void;
+  toggleMode: () => void;
   colors: ColorScheme;
-  /** @deprecated kept for existing screens — true when the active theme is "dark" */
+  /** @deprecated use `mode === "dark"` — kept for existing screens */
   isDarkMode: boolean;
-  /** @deprecated kept for existing screens — switches between "light" and "dark" only */
+  /** @deprecated use `toggleMode` — kept for existing screens */
   toggleDarkMode: () => void;
 }
 
 const ThemeContext = createContext<undefined | ThemeContextType>(undefined);
 
-const STORAGE_KEY = "themeName";
+const ACCENT_KEY = "themeAccent";
+const MODE_KEY = "themeMode";
+/** @deprecated old single-key storage, read once for migration only */
+const LEGACY_THEME_KEY = "themeName";
+/** @deprecated even older boolean storage, read once for migration only */
+const LEGACY_DARKMODE_KEY = "darkMode";
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [themeName, setThemeNameState] = useState<ThemeName>("light");
+  const [accent, setAccentState] = useState<ThemeAccent>("default");
+  const [mode, setModeState] = useState<ThemeMode>("light");
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((value) => {
-      if (value && value in themes) {
-        setThemeNameState(value as ThemeName);
+    (async () => {
+      const [savedAccent, savedMode] = await Promise.all([
+        AsyncStorage.getItem(ACCENT_KEY),
+        AsyncStorage.getItem(MODE_KEY),
+      ]);
+
+      if (savedAccent && savedMode) {
+        setAccentState(savedAccent as ThemeAccent);
+        setModeState(savedMode as ThemeMode);
         return;
       }
-      // Migrate from the old boolean "darkMode" key, if present.
-      AsyncStorage.getItem("darkMode").then((legacy) => {
-        if (legacy && JSON.parse(legacy) === true) {
-          setThemeNameState("dark");
+
+      // Migrate from the older single-key theme name, if present.
+      const legacyTheme = await AsyncStorage.getItem(LEGACY_THEME_KEY);
+      if (legacyTheme) {
+        if (legacyTheme === "dark") {
+          setAccentState("default");
+          setModeState("dark");
+        } else if (legacyTheme === "duolingo" || legacyTheme === "instagram") {
+          setAccentState(legacyTheme);
+          setModeState("light");
+        } else {
+          setAccentState("default");
+          setModeState("light");
         }
-      });
-    });
+        return;
+      }
+
+      // Migrate from the original boolean darkMode key, if present.
+      const legacyDark = await AsyncStorage.getItem(LEGACY_DARKMODE_KEY);
+      if (legacyDark && JSON.parse(legacyDark) === true) {
+        setModeState("dark");
+      }
+    })();
   }, []);
 
-  const setThemeName = (name: ThemeName) => {
-    setThemeNameState(name);
-    AsyncStorage.setItem(STORAGE_KEY, name);
+  const setAccent = (next: ThemeAccent) => {
+    setAccentState(next);
+    AsyncStorage.setItem(ACCENT_KEY, next);
   };
 
-  const toggleDarkMode = () => {
-    setThemeName(themeName === "dark" ? "light" : "dark");
+  const setMode = (next: ThemeMode) => {
+    setModeState(next);
+    AsyncStorage.setItem(MODE_KEY, next);
   };
 
-  const colors = themes[themeName];
+  const toggleMode = () => setMode(mode === "dark" ? "light" : "dark");
+
+  const colors = palettes[accent][mode];
 
   return (
     <ThemeContext.Provider
       value={{
-        themeName,
-        setThemeName,
+        accent,
+        mode,
+        setAccent,
+        setMode,
+        toggleMode,
         colors,
-        isDarkMode: themeName === "dark",
-        toggleDarkMode,
+        isDarkMode: mode === "dark",
+        toggleDarkMode: toggleMode,
       }}
     >
       {children}

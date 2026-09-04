@@ -86,11 +86,18 @@ export default function Index() {
                 style={styles.rowLeft}
                 onPress={() => toggleTodo({ id: item._id as Id<"todos"> })}
               >
-                <Ionicons
-                  name={item.iscompleted ? "checkbox" : "square-outline"}
-                  size={22}
-                  color={item.iscompleted ? colors.success : colors.textMuted}
-                />
+                <View
+                  style={[
+                    styles.checkbox,
+                    item.iscompleted
+                      ? { backgroundColor: colors.success, borderColor: colors.success }
+                      : { borderColor: colors.textMuted },
+                  ]}
+                >
+                  {item.iscompleted && (
+                    <Ionicons name="checkmark" size={20} color="#fff" />
+                  )}
+                </View>
                 <Text
                   style={[
                     styles.rowText,
@@ -170,8 +177,16 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     rowLeft: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 10,
+      gap: 12,
       flex: 1,
+    },
+    checkbox: {
+      width: 28,
+      height: 28,
+      borderRadius: 9,
+      borderWidth: 2,
+      alignItems: "center",
+      justifyContent: "center",
     },
     rowText: {
       color: colors.text,

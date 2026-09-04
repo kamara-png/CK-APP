@@ -1,17 +1,16 @@
 import { createSettingsStyles } from "@/assets/styles/settings.styles";
-import useTheme, { THEME_OPTIONS, ThemeName } from "@/hooks/useTheme";
+import useTheme, { ACCENT_OPTIONS, ThemeAccent } from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 
-const themeIcons: Record<ThemeName, keyof typeof Ionicons.glyphMap> = {
-  light: "sunny",
-  dark: "moon",
+const accentIcons: Record<ThemeAccent, keyof typeof Ionicons.glyphMap> = {
+  default: "color-palette",
   duolingo: "leaf",
   instagram: "camera",
 };
 
 const Preferences = () => {
-  const { colors, themeName, setThemeName } = useTheme();
+  const { colors, accent, setAccent, mode, toggleMode } = useTheme();
   const settingsStyles = createSettingsStyles(colors);
   const styles = createLocalStyles(colors);
 
@@ -19,10 +18,29 @@ const Preferences = () => {
     <View style={[settingsStyles.section, { backgroundColor: colors.surface }]}>
       <Text style={settingsStyles.sectionTitle}>Preferences</Text>
 
-      <Text style={styles.label}>Theme</Text>
+      <View style={settingsStyles.settingItem}>
+        <View style={settingsStyles.settingLeft}>
+          <View style={[settingsStyles.settingIcon, { backgroundColor: colors.primary + "20" }]}>
+            <Ionicons
+              name={mode === "dark" ? "moon" : "sunny"}
+              size={18}
+              color={colors.primary}
+            />
+          </View>
+          <Text style={settingsStyles.settingText}>Dark Mode</Text>
+        </View>
+        <Switch
+          value={mode === "dark"}
+          onValueChange={toggleMode}
+          trackColor={{ false: colors.border, true: colors.primary }}
+          thumbColor="#ffffff"
+        />
+      </View>
+
+      <Text style={styles.label}>Color theme</Text>
       <View style={styles.themeGrid}>
-        {THEME_OPTIONS.map((option) => {
-          const active = option.name === themeName;
+        {ACCENT_OPTIONS.map((option) => {
+          const active = option.name === accent;
           return (
             <TouchableOpacity
               key={option.name}
@@ -33,10 +51,10 @@ const Preferences = () => {
                   backgroundColor: active ? colors.primary + "15" : colors.bg,
                 },
               ]}
-              onPress={() => setThemeName(option.name)}
+              onPress={() => setAccent(option.name)}
             >
               <Ionicons
-                name={themeIcons[option.name]}
+                name={accentIcons[option.name]}
                 size={20}
                 color={active ? colors.primary : colors.textMuted}
               />
@@ -55,6 +73,10 @@ const Preferences = () => {
           );
         })}
       </View>
+      <Text style={styles.subnote}>
+        Each theme has its own light and dark look — the switch above applies to
+        whichever one you pick.
+      </Text>
     </View>
   );
 };
@@ -65,6 +87,7 @@ const createLocalStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       fontSize: 14,
       fontWeight: "600",
       color: colors.textMuted,
+      marginTop: 16,
       marginBottom: 12,
     },
     themeGrid: {
@@ -86,6 +109,12 @@ const createLocalStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       fontSize: 14,
       fontWeight: "600",
       flex: 1,
+    },
+    subnote: {
+      marginTop: 12,
+      fontSize: 12,
+      color: colors.textMuted,
+      lineHeight: 17,
     },
   });
 
