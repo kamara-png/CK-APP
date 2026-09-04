@@ -1,6 +1,7 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import useTheme from "@/hooks/useTheme";
+import { useSlowLoadingHint } from "@/hooks/useSlowLoadingHint";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
@@ -22,6 +23,7 @@ export default function Index() {
   const addTodo = useMutation(api.todos.addTodo);
   const toggleTodo = useMutation(api.todos.toggleTodo);
   const deleteTodo = useMutation(api.todos.deleteTodo);
+  const slowLoading = useSlowLoadingHint(todos === undefined);
 
   const handleAdd = async () => {
     const trimmed = text.trim();
@@ -61,7 +63,15 @@ export default function Index() {
       </View>
 
       {todos === undefined ? (
-        <ActivityIndicator style={{ marginTop: 24 }} color={colors.primary} />
+        <View style={{ marginTop: 24, alignItems: "center" }}>
+          <ActivityIndicator color={colors.primary} />
+          {slowLoading && (
+            <Text style={styles.hint}>
+              Still connecting — make sure `npx convex dev` is running and
+              EXPO_PUBLIC_CONVEX_URL is set correctly, then restart Expo.
+            </Text>
+          )}
+        </View>
       ) : (
         <FlatList
           data={todos}
@@ -176,5 +186,13 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       color: colors.textMuted,
       textAlign: "center",
       marginTop: 40,
+    },
+    hint: {
+      color: colors.textMuted,
+      textAlign: "center",
+      marginTop: 12,
+      paddingHorizontal: 24,
+      fontSize: 13,
+      lineHeight: 18,
     },
   });

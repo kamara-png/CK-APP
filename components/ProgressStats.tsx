@@ -1,6 +1,7 @@
 import { api } from "@/convex/_generated/api";
 import { createSettingsStyles } from "@/assets/styles/settings.styles";
 import useTheme from "@/hooks/useTheme";
+import { useSlowLoadingHint } from "@/hooks/useSlowLoadingHint";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -9,11 +10,17 @@ const ProgressStats = () => {
   const { colors } = useTheme();
   const settingsStyles = createSettingsStyles(colors);
   const todos = useQuery(api.todos.getTodos);
+  const slowLoading = useSlowLoadingHint(todos === undefined);
 
   if (todos === undefined) {
     return (
-      <View style={[settingsStyles.section, { backgroundColor: colors.surface }]}>
+      <View style={[settingsStyles.section, { backgroundColor: colors.surface, alignItems: "center" }]}>
         <ActivityIndicator color={colors.primary} />
+        {slowLoading && (
+          <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 8, textAlign: "center" }}>
+            Not connecting? Check `npx convex dev` is running.
+          </Text>
+        )}
       </View>
     );
   }

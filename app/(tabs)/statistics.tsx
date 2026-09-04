@@ -1,5 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import useTheme from "@/hooks/useTheme";
+import { useSlowLoadingHint } from "@/hooks/useSlowLoadingHint";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
@@ -8,11 +9,18 @@ const StatisticsScreen = () => {
   const { colors } = useTheme();
   const todos = useQuery(api.todos.getTodos);
   const styles = createStyles(colors);
+  const slowLoading = useSlowLoadingHint(todos === undefined);
 
   if (todos === undefined) {
     return (
       <View style={[styles.container, styles.centered]}>
         <ActivityIndicator color={colors.primary} />
+        {slowLoading && (
+          <Text style={styles.hint}>
+            Still connecting — make sure `npx convex dev` is running and
+            EXPO_PUBLIC_CONVEX_URL is set correctly, then restart Expo.
+          </Text>
+        )}
       </View>
     );
   }
@@ -141,6 +149,14 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       marginTop: 20,
       textAlign: "center",
       color: colors.textMuted,
+    },
+    hint: {
+      color: colors.textMuted,
+      textAlign: "center",
+      marginTop: 12,
+      paddingHorizontal: 24,
+      fontSize: 13,
+      lineHeight: 18,
     },
   });
 
