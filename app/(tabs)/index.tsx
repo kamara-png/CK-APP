@@ -1,30 +1,180 @@
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import useTheme from "@/hooks/useTheme";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useMutation, useQuery } from "convex/react";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function Index() {
-  const {toggleDarkMode} = useTheme();
+  const { colors, isDarkMode, toggleDarkMode } = useTheme();
+  const [text, setText] = useState("");
+
+  const todos = useQuery(api.todos.getTodos);
+  const addTodo = useMutation(api.todos.addTodo);
+  const toggleTodo = useMutation(api.todos.toggleTodo);
+  const deleteTodo = useMutation(api.todos.deleteTodo);
+
+  const handleAdd = async () => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setText("");
+    await addTodo({ text: trimmed });
+  };
+
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.content}>
-        Edit app/index.tsx to edit this screen.
-      </Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Streaks</Text>
+        <TouchableOpacity onPress={toggleDarkMode}>
+          <Ionicons
+            name={isDarkMode ? "sunny-outline" : "moon-outline"}
+            size={22}
+            color={colors.text}
+          />
+        </TouchableOpacity>
+      </View>
 
-      <Text>hello</Text>
-      <TouchableOpacity onPress={toggleDarkMode}>
-        <Text>toggle the mode</Text>
-      </TouchableOpacity>
+      <View style={styles.inputRow}>
+        <TextInput
+          style={styles.input}
+          value={text}
+          onChangeText={setText}
+          placeholder="Add a todo..."
+          placeholderTextColor={colors.textMuted}
+          onSubmitEditing={handleAdd}
+          returnKeyType="done"
+        />
+        <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+          <Ionicons name="add" size={22} color="#fff" />
+        </TouchableOpacity>
+      </View>
+
+      {todos === undefined ? (
+        <ActivityIndicator style={{ marginTop: 24 }} color={colors.primary} />
+      ) : (
+        <FlatList
+          data={todos}
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={styles.list}
+          ListEmptyComponent={
+            <Text style={styles.empty}>No todos yet — add one above.</Text>
+          }
+          renderItem={({ item }) => (
+            <View style={styles.row}>
+              <TouchableOpacity
+                style={styles.rowLeft}
+                onPress={() => toggleTodo({ id: item._id as Id<"todos"> })}
+              >
+                <Ionicons
+                  name={item.iscompleted ? "checkbox" : "square-outline"}
+                  size={22}
+                  color={item.iscompleted ? colors.success : colors.textMuted}
+                />
+                <Text
+                  style={[
+                    styles.rowText,
+                    item.iscompleted && styles.rowTextDone,
+                  ]}
+                >
+                  {item.text}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => deleteTodo({ id: item._id as Id<"todos"> })}
+              >
+                <Ionicons name="trash-outline" size={20} color={colors.danger} />
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  content: {
-    fontSize: 22,
-  },
-});
+const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+      paddingHorizontal: 16,
+      paddingTop: 60,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 16,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    inputRow: {
+      flexDirection: "row",
+      gap: 8,
+      marginBottom: 16,
+    },
+    input: {
+      flex: 1,
+      backgroundColor: colors.backgrounds.input,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      color: colors.text,
+    },
+    addButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 10,
+      width: 44,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    list: {
+      paddingBottom: 24,
+    },
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      marginBottom: 8,
+    },
+    rowLeft: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      flex: 1,
+    },
+    rowText: {
+      color: colors.text,
+      fontSize: 16,
+      flexShrink: 1,
+    },
+    rowTextDone: {
+      textDecorationLine: "line-through",
+      color: colors.textMuted,
+    },
+    empty: {
+      color: colors.textMuted,
+      textAlign: "center",
+      marginTop: 40,
+    },
+  });
