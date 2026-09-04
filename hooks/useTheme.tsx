@@ -29,7 +29,17 @@ export interface ColorScheme {
     editInput: string;
   };
   statusBarStyle: "light-content" | "dark-content";
+  isDark: boolean;
 }
+
+export type ThemeName = "light" | "dark" | "duolingo" | "instagram";
+
+export const THEME_OPTIONS: { name: ThemeName; label: string }[] = [
+  { name: "light", label: "Light" },
+  { name: "dark", label: "Dark" },
+  { name: "duolingo", label: "Duolingo" },
+  { name: "instagram", label: "Instagram" },
+];
 
 const lightColors: ColorScheme = {
   bg: "#f8fafc",
@@ -56,7 +66,8 @@ const lightColors: ColorScheme = {
     input: "#ffffff",
     editInput: "#ffffff",
   },
-  statusBarStyle: "dark-content" as const,
+  statusBarStyle: "dark-content",
+  isDark: false,
 };
 
 const darkColors: ColorScheme = {
@@ -84,37 +95,130 @@ const darkColors: ColorScheme = {
     input: "#1e293b",
     editInput: "#0f172a",
   },
-  statusBarStyle: "light-content" as const,
+  statusBarStyle: "light-content",
+  isDark: true,
+};
+
+// Bright, playful green — inspired by Duolingo's owl-and-leaf palette.
+const duolingoColors: ColorScheme = {
+  bg: "#fffcf5",
+  surface: "#ffffff",
+  text: "#3c3c3c",
+  textMuted: "#777777",
+  border: "#e5e5e5",
+  primary: "#58cc02",
+  success: "#58cc02",
+  warning: "#ffc800",
+  danger: "#ff4b4b",
+  shadow: "#000000",
+  gradients: {
+    background: ["#fffcf5", "#f0fdf0"],
+    surface: ["#ffffff", "#fbfff0"],
+    primary: ["#89e219", "#58cc02"],
+    success: ["#89e219", "#58cc02"],
+    warning: ["#ffe066", "#ffc800"],
+    danger: ["#ff6b6b", "#ff4b4b"],
+    muted: ["#e5e5e5", "#cccccc"],
+    empty: ["#f7f7f7", "#e5e5e5"],
+  },
+  backgrounds: {
+    input: "#ffffff",
+    editInput: "#ffffff",
+  },
+  statusBarStyle: "dark-content",
+  isDark: false,
+};
+
+// Warm sunset gradient — inspired by Instagram's brand palette.
+const instagramColors: ColorScheme = {
+  bg: "#fafafa",
+  surface: "#ffffff",
+  text: "#262626",
+  textMuted: "#8e8e8e",
+  border: "#dbdbdb",
+  primary: "#c13584",
+  success: "#4caf50",
+  warning: "#fcaf45",
+  danger: "#ed4956",
+  shadow: "#000000",
+  gradients: {
+    background: ["#fdf4f7", "#fef6ef"],
+    surface: ["#ffffff", "#fef9f5"],
+    primary: ["#833ab4", "#fd1d1d"],
+    success: ["#4caf50", "#2e7d32"],
+    warning: ["#f77737", "#fcaf45"],
+    danger: ["#fd1d1d", "#c13584"],
+    muted: ["#dbdbdb", "#c7c7c7"],
+    empty: ["#f5f5f5", "#e5e5e5"],
+  },
+  backgrounds: {
+    input: "#fafafa",
+    editInput: "#ffffff",
+  },
+  statusBarStyle: "dark-content",
+  isDark: false,
+};
+
+const themes: Record<ThemeName, ColorScheme> = {
+  light: lightColors,
+  dark: darkColors,
+  duolingo: duolingoColors,
+  instagram: instagramColors,
 };
 
 interface ThemeContextType {
-  isDarkMode: boolean;
-  toggleDarkMode: () => void;
+  themeName: ThemeName;
+  setThemeName: (name: ThemeName) => void;
   colors: ColorScheme;
+  /** @deprecated kept for existing screens — true when the active theme is "dark" */
+  isDarkMode: boolean;
+  /** @deprecated kept for existing screens — switches between "light" and "dark" only */
+  toggleDarkMode: () => void;
 }
 
 const ThemeContext = createContext<undefined | ThemeContextType>(undefined);
 
+const STORAGE_KEY = "themeName";
+
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [themeName, setThemeNameState] = useState<ThemeName>("light");
 
   useEffect(() => {
-    // get the user's choice
-    AsyncStorage.getItem("darkMode").then((value) => {
-      if (value) setIsDarkMode(JSON.parse(value));
+    AsyncStorage.getItem(STORAGE_KEY).then((value) => {
+      if (value && value in themes) {
+        setThemeNameState(value as ThemeName);
+        return;
+      }
+      // Migrate from the old boolean "darkMode" key, if present.
+      AsyncStorage.getItem("darkMode").then((legacy) => {
+        if (legacy && JSON.parse(legacy) === true) {
+          setThemeNameState("dark");
+        }
+      });
     });
   }, []);
 
-  const toggleDarkMode = async () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-    await AsyncStorage.setItem("darkMode", JSON.stringify(newMode));
+  const setThemeName = (name: ThemeName) => {
+    setThemeNameState(name);
+    AsyncStorage.setItem(STORAGE_KEY, name);
   };
 
-  const colors = isDarkMode ? darkColors : lightColors;
+  const toggleDarkMode = () => {
+    setThemeName(themeName === "dark" ? "light" : "dark");
+  };
+
+  const colors = themes[themeName];
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode, colors }}>
+    <ThemeContext.Provider
+      value={{
+        themeName,
+        setThemeName,
+        colors,
+        isDarkMode: themeName === "dark",
+        toggleDarkMode,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );
