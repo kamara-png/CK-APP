@@ -9,16 +9,39 @@ export const getTodos = query ({
 }); 
 
 export const addTodo = mutation({
-    args: {text:v.string()},
+    args: {
+        text:v.string(),
+        reminderAt: v.optional(v.number()),
+        reminderSound: v.optional(v.union(v.literal("default"), v.literal("silent"))),
+    },
     handler: async(ctx,args) => {
         const todoId =await ctx.db.insert("todos", {
             text: args.text,
             iscompleted: false,
+            reminderAt: args.reminderAt,
+            reminderSound: args.reminderSound,
         })
 
         return todoId;
     }
        })
+
+       export const setReminder = mutation({
+        args: {
+            id: v.id("todos"),
+            reminderAt: v.optional(v.number()),
+            reminderSound: v.optional(v.union(v.literal("default"), v.literal("silent"))),
+        },
+        handler: async(ctx,args) => {
+            const todo = await ctx.db.get(args.id)
+            if(!todo) throw new ConvexError("Todo not found")
+
+            await ctx.db.patch(args.id,{
+                reminderAt: args.reminderAt,
+                reminderSound: args.reminderSound,
+            })
+        }
+    })
 
        export const toggleTodo = mutation({
         args:{id:v.id("todos")},

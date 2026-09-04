@@ -32,7 +32,7 @@ export interface ColorScheme {
   isDark: boolean;
 }
 
-export type ThemeAccent = "default" | "duolingo" | "instagram";
+export type ThemeAccent = "default" | "duolingo" | "instagram" | "obsidian";
 export type ThemeMode = "light" | "dark";
 /** @deprecated old combined theme identifier, kept only for migrating existing saved values */
 export type ThemeName = "light" | "dark" | "duolingo" | "instagram";
@@ -41,6 +41,7 @@ export const ACCENT_OPTIONS: { name: ThemeAccent; label: string }[] = [
   { name: "default", label: "Default" },
   { name: "duolingo", label: "Duolingo" },
   { name: "instagram", label: "Instagram" },
+  { name: "obsidian", label: "Obsidian" },
 ];
 
 const defaultLight: ColorScheme = {
@@ -201,10 +202,65 @@ const instagramDark: ColorScheme = {
   isDark: true,
 };
 
+// Obsidian's default palette — near-black surfaces in dark mode, off-white in
+// light mode, both anchored by its signature violet accent.
+const obsidianLight: ColorScheme = {
+  bg: "#ffffff",
+  surface: "#f6f6f6",
+  text: "#2e3338",
+  textMuted: "#6e7681",
+  border: "#e3e3e3",
+  primary: "#7c3aed",
+  success: "#08a892",
+  warning: "#e0a72e",
+  danger: "#e5484d",
+  shadow: "#000000",
+  gradients: {
+    background: ["#ffffff", "#f6f6f6"],
+    surface: ["#f6f6f6", "#efefef"],
+    primary: ["#8b5cf6", "#7c3aed"],
+    success: ["#08a892", "#067a6a"],
+    warning: ["#e0a72e", "#c78d1a"],
+    danger: ["#e5484d", "#c93a3e"],
+    muted: ["#e3e3e3", "#cccccc"],
+    empty: ["#f0f0f0", "#e3e3e3"],
+  },
+  backgrounds: { input: "#ffffff", editInput: "#f6f6f6" },
+  statusBarStyle: "dark-content",
+  isDark: false,
+};
+
+const obsidianDark: ColorScheme = {
+  bg: "#1e1e1e",
+  surface: "#262626",
+  text: "#dcddde",
+  textMuted: "#999999",
+  border: "#363636",
+  primary: "#a78bfa",
+  success: "#4dd4c4",
+  warning: "#e0a72e",
+  danger: "#fb7185",
+  shadow: "#000000",
+  gradients: {
+    background: ["#1e1e1e", "#262626"],
+    surface: ["#262626", "#2e2e2e"],
+    primary: ["#8b5cf6", "#a78bfa"],
+    success: ["#08a892", "#4dd4c4"],
+    warning: ["#c78d1a", "#e0a72e"],
+    danger: ["#e5484d", "#fb7185"],
+    muted: ["#363636", "#454545"],
+    empty: ["#2e2e2e", "#363636"],
+  },
+  backgrounds: { input: "#262626", editInput: "#1e1e1e" },
+  statusBarStyle: "light-content",
+  isDark: true,
+};
+
 const palettes: Record<ThemeAccent, Record<ThemeMode, ColorScheme>> = {
   default: { light: defaultLight, dark: defaultDark },
   duolingo: { light: duolingoLight, dark: duolingoDark },
   instagram: { light: instagramLight, dark: instagramDark },
+  obsidian: { light: obsidianLight, dark: obsidianDark },
 };
 
 interface ThemeContextType {

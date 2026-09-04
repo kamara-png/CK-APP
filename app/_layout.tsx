@@ -1,6 +1,8 @@
 import { ThemeProvider } from "@/hooks/useTheme";
+import { configureNotifications } from "@/lib/notifications";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { Stack } from "expo-router";
+import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 const convexUrl = process.env.EXPO_PUBLIC_CONVEX_URL;
@@ -29,6 +31,10 @@ function MissingEnvScreen() {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    configureNotifications();
+  }, []);
+
   if (!convex) {
     return <MissingEnvScreen />;
   }
@@ -38,6 +44,8 @@ export default function RootLayout() {
       <ThemeProvider>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="notes/index" options={{ presentation: "modal" }} />
+          <Stack.Screen name="notes/[id]" options={{ presentation: "modal" }} />
         </Stack>
       </ThemeProvider>
     </ConvexProvider>

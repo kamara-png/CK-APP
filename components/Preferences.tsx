@@ -7,6 +7,7 @@ const accentIcons: Record<ThemeAccent, keyof typeof Ionicons.glyphMap> = {
   default: "color-palette",
   duolingo: "leaf",
   instagram: "camera",
+  obsidian: "diamond",
 };
 
 const Preferences = () => {
