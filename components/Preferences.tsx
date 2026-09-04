@@ -3,16 +3,9 @@ import useTheme, { ACCENT_OPTIONS, ThemeAccent } from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 
-<<<<<<< HEAD
-const themeIcons: Record<ThemeName, keyof typeof Ionicons.glyphMap> = {
-  light: "sunny",
-  dark: "moon",
-  duolingo: "balloon",
-=======
 const accentIcons: Record<ThemeAccent, keyof typeof Ionicons.glyphMap> = {
   default: "color-palette",
   duolingo: "leaf",
->>>>>>> c0d0c9a276542e17d2018175d86e907ebc1a4940
   instagram: "camera",
 };
 
