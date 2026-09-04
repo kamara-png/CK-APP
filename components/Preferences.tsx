@@ -6,7 +6,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 const themeIcons: Record<ThemeName, keyof typeof Ionicons.glyphMap> = {
   light: "sunny",
   dark: "moon",
-  duolingo: "leaf",
+  duolingo: "balloon",
   instagram: "camera",
 };
 
@@ -70,7 +70,7 @@ const createLocalStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     themeGrid: {
       flexDirection: "row",
       flexWrap: "wrap",
-      gap: 10,
+      gap: 12,
     },
     themeOption: {
       flexDirection: "row",
