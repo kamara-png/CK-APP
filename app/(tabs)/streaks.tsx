@@ -2,6 +2,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import HabitEditor from "@/components/HabitEditor";
 import SwipeableRow from "@/components/SwipeableRow";
+import SwipeTabScreen from "@/components/SwipeTabScreen";
 import useTheme from "@/hooks/useTheme";
 import { computeStreakStats, getLast7Days, getLocalDateKey } from "@/lib/streaks";
 import { Ionicons } from "@expo/vector-icons";
@@ -43,6 +44,7 @@ export default function StreaksScreen() {
   };
 
   return (
+    <SwipeTabScreen path="/streaks">
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Streaks</Text>
@@ -144,6 +146,7 @@ export default function StreaksScreen() {
         onClose={() => setEditorOpen(false)}
       />
     </View>
+    </SwipeTabScreen>
   );
 }
 

@@ -50,6 +50,10 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="notes/index" options={{ presentation: "modal" }} />
             <Stack.Screen name="notes/[id]" options={{ presentation: "modal" }} />
+            <Stack.Screen
+              name="profile"
+              options={{ presentation: "transparentModal", animation: "slide_from_bottom" }}
+            />
           </Stack>
         </ThemeProvider>
       </ConvexProvider>

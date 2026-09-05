@@ -1,5 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import ProgressRing from "@/components/ProgressRing";
+import SwipeTabScreen from "@/components/SwipeTabScreen";
 import WeeklyActivityChart from "@/components/WeeklyActivityChart";
 import useTheme from "@/hooks/useTheme";
 import { useSlowLoadingHint } from "@/hooks/useSlowLoadingHint";
@@ -15,6 +16,7 @@ const StatisticsScreen = () => {
 
   if (todos === undefined) {
     return (
+      <SwipeTabScreen path="/statistics">
       <View style={[styles.container, styles.centered]}>
         <ActivityIndicator color={colors.primary} />
         {slowLoading && (
@@ -24,6 +26,7 @@ const StatisticsScreen = () => {
           </Text>
         )}
       </View>
+      </SwipeTabScreen>
     );
   }
 
@@ -40,6 +43,7 @@ const StatisticsScreen = () => {
   ] as const;
 
   return (
+    <SwipeTabScreen path="/statistics">
     <View style={styles.container}>
       <Text style={styles.title}>Statistics</Text>
 
@@ -117,6 +121,7 @@ const StatisticsScreen = () => {
         </>
       )}
     </View>
+    </SwipeTabScreen>
   );
 };
 
