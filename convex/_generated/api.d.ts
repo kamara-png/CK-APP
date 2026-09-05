@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as habits from "../habits.js";
 import type * as notes from "../notes.js";
 import type * as todos from "../todos.js";
 
@@ -18,6 +19,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  habits: typeof habits;
   notes: typeof notes;
   todos: typeof todos;
 }>;

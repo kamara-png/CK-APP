@@ -1,6 +1,7 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import ReminderEditor from "@/components/ReminderEditor";
+import SwipeableRow from "@/components/SwipeableRow";
 import useTheme from "@/hooks/useTheme";
 import { useSlowLoadingHint } from "@/hooks/useSlowLoadingHint";
 import {
@@ -12,7 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -29,6 +30,7 @@ export default function Index() {
   const { colors } = useTheme();
   const router = useRouter();
   const [text, setText] = useState("");
+  const [search, setSearch] = useState("");
 
   const todos = useQuery(api.todos.getTodos);
   const addTodo = useMutation(api.todos.addTodo);
@@ -36,6 +38,13 @@ export default function Index() {
   const deleteTodo = useMutation(api.todos.deleteTodo);
   const setReminder = useMutation(api.todos.setReminder);
   const slowLoading = useSlowLoadingHint(todos === undefined);
+
+  const filteredTodos = useMemo(() => {
+    if (!todos) return [];
+    const q = search.trim().toLowerCase();
+    if (!q) return todos;
+    return todos.filter((t) => t.text.toLowerCase().includes(q));
+  }, [todos, search]);
 
   // Reminder pending on the todo currently being composed (not saved yet).
   const [pendingReminder, setPendingReminder] = useState<{ date: Date; sound: ReminderSound } | null>(
@@ -114,7 +123,7 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Streaks</Text>
+        <Text style={styles.title}>Todos</Text>
         <TouchableOpacity onPress={() => router.push("/notes")}>
           <Ionicons name="document-text-outline" size={24} color={colors.text} />
         </TouchableOpacity>
@@ -148,6 +157,17 @@ export default function Index() {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.searchRow}>
+        <Ionicons name="search" size={16} color={colors.textMuted} />
+        <TextInput
+          style={styles.searchInput}
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Search todos..."
+          placeholderTextColor={colors.textMuted}
+        />
+      </View>
+
       {todos === undefined ? (
         <View style={{ marginTop: 24, alignItems: "center" }}>
           <ActivityIndicator color={colors.primary} />
@@ -160,70 +180,80 @@ export default function Index() {
         </View>
       ) : (
         <FlatList
-          data={todos}
+          data={filteredTodos}
           keyExtractor={(item) => item._id}
           contentContainerStyle={styles.list}
           ListEmptyComponent={
-            <Text style={styles.empty}>No todos yet — add one above.</Text>
+            <Text style={styles.empty}>
+              {todos.length === 0 ? "No todos yet — add one above." : "No matches."}
+            </Text>
           }
           renderItem={({ item }) => (
-            <View style={styles.row}>
-              <TouchableOpacity
-                style={styles.rowLeft}
-                onPress={() => toggleTodo({ id: item._id as Id<"todos"> })}
-              >
-                <View
-                  style={[
-                    styles.checkbox,
-                    item.iscompleted
-                      ? { backgroundColor: colors.success, borderColor: colors.success }
-                      : { borderColor: colors.textMuted },
-                  ]}
+            <SwipeableRow
+              style={{ marginBottom: 8 }}
+              completeColor={colors.success}
+              deleteColor={colors.danger}
+              onSwipeComplete={() => toggleTodo({ id: item._id as Id<"todos"> })}
+              onSwipeDelete={() => deleteTodo({ id: item._id as Id<"todos"> })}
+            >
+              <View style={styles.row}>
+                <TouchableOpacity
+                  style={styles.rowLeft}
+                  onPress={() => toggleTodo({ id: item._id as Id<"todos"> })}
                 >
-                  {item.iscompleted && (
-                    <Ionicons name="checkmark" size={20} color="#fff" />
-                  )}
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text
+                  <View
                     style={[
-                      styles.rowText,
-                      item.iscompleted && styles.rowTextDone,
+                      styles.checkbox,
+                      item.iscompleted
+                        ? { backgroundColor: colors.success, borderColor: colors.success }
+                        : { borderColor: colors.textMuted },
                     ]}
                   >
-                    {item.text}
-                  </Text>
-                  {item.reminderAt && (
-                    <View style={styles.reminderChip}>
-                      <Ionicons name="alarm-outline" size={12} color={colors.primary} />
-                      <Text style={styles.reminderChipText}>
-                        {new Date(item.reminderAt).toLocaleString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                        })}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => openReminderEditorForExisting(item._id as Id<"todos">)}
-                style={{ paddingHorizontal: 6 }}
-              >
-                <Ionicons
-                  name={item.reminderAt ? "alarm" : "alarm-outline"}
-                  size={18}
-                  color={item.reminderAt ? colors.primary : colors.textMuted}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => deleteTodo({ id: item._id as Id<"todos"> })}
-              >
-                <Ionicons name="trash-outline" size={20} color={colors.danger} />
-              </TouchableOpacity>
-            </View>
+                    {item.iscompleted && (
+                      <Ionicons name="checkmark" size={20} color="#fff" />
+                    )}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={[
+                        styles.rowText,
+                        item.iscompleted && styles.rowTextDone,
+                      ]}
+                    >
+                      {item.text}
+                    </Text>
+                    {item.reminderAt && (
+                      <View style={styles.reminderChip}>
+                        <Ionicons name="alarm-outline" size={12} color={colors.primary} />
+                        <Text style={styles.reminderChipText}>
+                          {new Date(item.reminderAt).toLocaleString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => openReminderEditorForExisting(item._id as Id<"todos">)}
+                  style={{ paddingHorizontal: 6 }}
+                >
+                  <Ionicons
+                    name={item.reminderAt ? "alarm" : "alarm-outline"}
+                    size={18}
+                    color={item.reminderAt ? colors.primary : colors.textMuted}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => deleteTodo({ id: item._id as Id<"todos"> })}
+                >
+                  <Ionicons name="trash-outline" size={20} color={colors.danger} />
+                </TouchableOpacity>
+              </View>
+            </SwipeableRow>
           )}
         />
       )}
@@ -264,7 +294,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     inputRow: {
       flexDirection: "row",
       gap: 8,
-      marginBottom: 16,
+      marginBottom: 12,
     },
     input: {
       flex: 1,
@@ -291,6 +321,22 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       alignItems: "center",
       justifyContent: "center",
     },
+    searchRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      backgroundColor: colors.backgrounds.input,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      marginBottom: 16,
+    },
+    searchInput: {
+      flex: 1,
+      paddingVertical: 8,
+      color: colors.text,
+    },
     list: {
       paddingBottom: 24,
     },
@@ -302,7 +348,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       borderRadius: 10,
       paddingHorizontal: 14,
       paddingVertical: 12,
-      marginBottom: 8,
       gap: 4,
     },
     rowLeft: {

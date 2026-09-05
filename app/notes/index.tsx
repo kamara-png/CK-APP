@@ -85,7 +85,10 @@ export default function NotesListScreen() {
           }
           renderItem={({ item }) => (
             <TouchableOpacity
-              style={styles.noteCard}
+              style={[
+                styles.noteCard,
+                item.color ? { borderLeftWidth: 4, borderLeftColor: item.color } : null,
+              ]}
               onPress={() => router.push(`/notes/${item._id}`)}
             >
               <Text style={styles.noteTitle} numberOfLines={1}>

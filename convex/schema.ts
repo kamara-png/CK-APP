@@ -13,5 +13,20 @@ export default defineSchema({
         title: v.string(),
         content: v.string(),
         updatedAt: v.number(),
+        color: v.optional(v.string()),
     }).index("by_updatedAt", ["updatedAt"]),
+
+    habits: defineTable({
+        name: v.string(),
+        color: v.string(),
+        createdAt: v.number(),
+    }),
+
+    habitCheckins: defineTable({
+        habitId: v.id("habits"),
+        // Local calendar date the check-in counts for, e.g. "2026-09-05".
+        dateKey: v.string(),
+    })
+        .index("by_habit", ["habitId"])
+        .index("by_habit_date", ["habitId", "dateKey"]),
 })
