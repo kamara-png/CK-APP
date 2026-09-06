@@ -90,7 +90,14 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       marginBottom: 16,
     },
     drawerEyebrow: { fontSize: 10, fontWeight: "800", letterSpacing: 1.2, color: colors.textMuted },
-    drawerTitle: { fontSize: 28, fontWeight: "800", color: colors.text, marginTop: 2 },
+    drawerTitle: {
+      flex: 1,
+      fontSize: 28,
+      fontWeight: "800",
+      color: colors.text,
+      marginTop: 2,
+      textAlign: "center",
+    },
     closeButton: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center" },
     profileCard: { borderWidth: 1, borderRadius: 18, padding: 14, marginBottom: 16 },
     profileRow: {

@@ -339,8 +339,12 @@ export default function NoteEditorScreen() {
         <View style={styles.pickerBackdrop}>
           <View style={styles.pickerCard}>
             <View style={styles.pickerHeader}>
+              <View style={styles.pickerHeaderSide} />
               <Text style={styles.pickerTitle}>Pick a color</Text>
-              <TouchableOpacity onPress={() => setCustomPickerOpen(false)}>
+              <TouchableOpacity
+                onPress={() => setCustomPickerOpen(false)}
+                style={styles.pickerHeaderSide}
+              >
                 <Ionicons name="close" size={22} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
@@ -440,7 +444,10 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       fontSize: 17,
       fontWeight: "700",
       color: colors.text,
+      flex: 1,
+      textAlign: "center",
     },
+    pickerHeaderSide: { width: 22 },
     doneButton: {
       marginTop: 16,
       borderRadius: 10,
