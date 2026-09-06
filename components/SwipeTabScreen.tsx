@@ -1,10 +1,17 @@
-import { ReactNode } from "react";
-import { View } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import { ReactNode, useCallback, useEffect } from "react";
+import { Dimensions } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { useRouter } from "expo-router";
-import { runOnJS } from "react-native-reanimated";
+import Animated, {
+    runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+} from "react-native-reanimated";
 
 const TAB_ORDER = ["/", "/streaks", "/statistics"] as const;
+const SCREEN_WIDTH = Dimensions.get("window").width;
+let lastFocusedIndex = 0;
 
 interface SwipeTabScreenProps {
   path: (typeof TAB_ORDER)[number];
@@ -22,6 +29,26 @@ interface SwipeTabScreenProps {
 export default function SwipeTabScreen({ path, children }: SwipeTabScreenProps) {
   const router = useRouter();
   const currentIndex = TAB_ORDER.indexOf(path);
+  const translateX = useSharedValue(0);
+  const opacity = useSharedValue(1);
+  const scale = useSharedValue(1);
+
+  useFocusEffect(
+    useCallback(() => {
+      const direction = currentIndex >= lastFocusedIndex ? 1 : -1;
+      lastFocusedIndex = currentIndex;
+      translateX.value = direction * SCREEN_WIDTH * 0.12;
+      opacity.value = 0.82;
+      scale.value = 0.985;
+      translateX.value = withSpring(0, { damping: 20, stiffness: 180, mass: 0.8 });
+      opacity.value = withSpring(1, { damping: 20, stiffness: 180, mass: 0.8 });
+      scale.value = withSpring(1, { damping: 20, stiffness: 180, mass: 0.8 });
+    }, [currentIndex, opacity, scale, translateX])
+  );
+
+  useEffect(() => {
+    lastFocusedIndex = currentIndex;
+  }, [currentIndex]);
 
   const goTo = (index: number) => {
     if (index < 0 || index >= TAB_ORDER.length) return;
@@ -42,7 +69,17 @@ export default function SwipeTabScreen({ path, children }: SwipeTabScreenProps) 
 
   return (
     <GestureDetector gesture={pan}>
-      <View style={{ flex: 1 }}>{children}</View>
+      <Animated.View
+        style={[
+          { flex: 1 },
+          useAnimatedStyle(() => ({
+            opacity: opacity.value,
+            transform: [{ translateX: translateX.value }, { scale: scale.value }],
+          })),
+        ]}
+      >
+        {children}
+      </Animated.View>
     </GestureDetector>
   );
 }

@@ -82,7 +82,10 @@ export default function ProfileContent({ onClose }: ProfileContentProps) {
 
 const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
   StyleSheet.create({
-    content: { paddingBottom: 24 },
+    content: {
+      gap: 16,
+      paddingBottom: 24,
+    },
     drawerHeader: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -99,7 +102,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       textAlign: "center",
     },
     closeButton: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center" },
-    profileCard: { borderWidth: 1, borderRadius: 18, padding: 14, marginBottom: 16 },
+    profileCard: { borderWidth: 1, borderRadius: 18, padding: 14 },
     profileRow: {
       flexDirection: "row",
       alignItems: "center",

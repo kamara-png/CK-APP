@@ -23,6 +23,7 @@ import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   StyleSheet,
   Text,
@@ -84,12 +85,30 @@ export default function Index() {
     return base.filter((t) => t._id !== pendingDeleteId);
   }, [todos, search, pendingDeleteId]);
 
-  const handleCreate = async (text: string) => {
+  const handleCreate = async (
+    text: string,
+    reminderAt?: number,
+    reminderSound?: ReminderSound
+  ) => {
     setAddModalOpen(false);
-    const todoId = await addTodo({ text });
+    const todoId = await addTodo({ text, reminderAt, reminderSound });
 
-    // Will ask to place reminder after creation.
-    setReminderTarget({ kind: "existing", id: todoId });
+    if (reminderAt && reminderSound) {
+      if (reminderAt <= Date.now()) {
+        Alert.alert("Choose a future time", "The alarm time must be later than now.");
+        return;
+      }
+
+      const granted = await ensureNotificationPermission();
+      if (granted) {
+        await scheduleTodoReminder(todoId, text, new Date(reminderAt), reminderSound);
+      } else {
+        Alert.alert(
+          "Notifications are off",
+          "The task was added, but your alarm could not be scheduled without notification permission."
+        );
+      }
+    }
   };
 
   const handleSaveReminder = async (date: Date, sound: ReminderSound) => {
@@ -152,7 +171,7 @@ export default function Index() {
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => setDrawerOpen(true)} style={styles.headerAction}>
-            <Ionicons name="ellipsis-vertical" size={30} color={colors.text} />
+            <Ionicons name="menu" size={30} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.title}>To-dos</Text>
           <TouchableOpacity onPress={() => router.push("/notes")}>
