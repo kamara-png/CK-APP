@@ -1,11 +1,11 @@
 import { ThemeProvider } from "@/hooks/useTheme";
 import { configureNotifications } from "@/lib/notifications";
 import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  useFonts,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    useFonts,
 } from "@expo-google-fonts/inter";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { Stack } from "expo-router";
