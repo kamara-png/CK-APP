@@ -1,5 +1,5 @@
-import { api } from "@/convex/_generated/api";
 import { createSettingsStyles } from "@/assets/styles/settings.styles";
+import { api } from "@/convex/_generated/api";
 import useTheme from "@/hooks/useTheme";
 import { exportAllData } from "@/lib/backup";
 import { Ionicons } from "@expo/vector-icons";
@@ -38,7 +38,7 @@ const BackupExport = () => {
       >
         <View style={settingsStyles.actionLeft}>
           <View style={[settingsStyles.actionIcon, { backgroundColor: colors.primary + "20" }]}>
-            <Ionicons name="download-outline" size={18} color={colors.primary} />
+            <Ionicons name="download" size={18} color={colors.primary} />
           </View>
           <Text style={{ color: colors.text, fontWeight: "600" }}>
             {exporting ? "Preparing…" : "Export all data"}

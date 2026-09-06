@@ -1,5 +1,5 @@
-import { api } from "@/convex/_generated/api";
 import { createSettingsStyles } from "@/assets/styles/settings.styles";
+import { api } from "@/convex/_generated/api";
 import useTheme from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "convex/react";
@@ -32,7 +32,7 @@ const DangerZone = () => {
       <TouchableOpacity style={settingsStyles.actionButton} onPress={handleClearAll}>
         <View style={settingsStyles.actionLeft}>
           <View style={[settingsStyles.actionIcon, { backgroundColor: colors.danger + "20" }]}>
-            <Ionicons name="trash-outline" size={18} color={colors.danger} />
+            <Ionicons name="trash" size={18} color={colors.danger} />
           </View>
           <Text style={settingsStyles.actionTextDanger}>Clear All Todos</Text>
         </View>

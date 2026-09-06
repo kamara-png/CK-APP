@@ -55,9 +55,6 @@ export default function NotesListScreen() {
           <Ionicons name="chevron-back" size={26} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.title}>Notes</Text>
-        <TouchableOpacity onPress={handleCreate} style={{ padding: 4 }}>
-          <Ionicons name="add-circle" size={28} color={colors.primary} />
-        </TouchableOpacity>
       </View>
 
       <View style={styles.searchRow}>
@@ -66,7 +63,7 @@ export default function NotesListScreen() {
           style={styles.searchInput}
           value={search}
           onChangeText={setSearch}
-          placeholder="Search notes..."
+          placeholder="Search them notes..."
           placeholderTextColor={colors.textMuted}
         />
       </View>
@@ -80,7 +77,7 @@ export default function NotesListScreen() {
           contentContainerStyle={{ paddingBottom: 24 }}
           ListEmptyComponent={
             <Text style={styles.empty}>
-              {notes.length === 0 ? "No notes yet — tap + to create one." : "No matches."}
+              {notes.length === 0 ? "No notes yet, tap + to do something for once" : "Hakuna matches."}
             </Text>
           }
           renderItem={({ item }) => (
@@ -95,13 +92,20 @@ export default function NotesListScreen() {
                 {item.title.trim() || "Untitled"}
               </Text>
               <Text style={styles.noteSnippet} numberOfLines={2}>
-                {item.content.trim() || "No content yet"}
+                {item.content.trim() || "No creativity yet"}
               </Text>
               <Text style={styles.noteMeta}>{timeAgo(item.updatedAt)}</Text>
             </TouchableOpacity>
           )}
         />
       )}
+      <View>
+      <TouchableOpacity
+                style={[styles.fab, { backgroundColor: colors.primary }]}
+                onPress={() => handleCreate()} >
+                <Ionicons name="add" size={30} color="#fff" />
+              </TouchableOpacity>
+    </View>
     </View>
   );
 }
@@ -121,9 +125,11 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       marginBottom: 16,
     },
     title: {
-      fontSize: 22,
-      fontWeight: "700",
+      fontSize: 30,
+      fontWeight: "900",
       color: colors.text,
+      right: 270,
+      position: "absolute",
     },
     searchRow: {
       flexDirection: "row",
@@ -169,5 +175,20 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       color: colors.textMuted,
       fontSize: 11,
       marginTop: 8,
+    },
+     fab: {
+      position: "absolute",
+      right: 10,
+      bottom: 100,
+      width: 58,
+      height: 58,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      elevation: 6,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.3,
+      shadowRadius: 5,
     },
   });

@@ -116,4 +116,5 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     textAlign: "left",
   },
+  
 });

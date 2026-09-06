@@ -33,19 +33,19 @@ const ProgressStats = () => {
     {
       label: "Total",
       value: total,
-      icon: "list-outline" as const,
+      icon: "list" as const,
       color: colors.primary,
     },
     {
       label: "Completed",
       value: completed,
-      icon: "checkmark-circle-outline" as const,
+      icon: "checkmark-circle" as const,
       color: colors.success,
     },
     {
       label: "Remaining",
       value: remaining,
-      icon: "time-outline" as const,
+      icon: "time" as const,
       color: colors.warning,
     },
   ];

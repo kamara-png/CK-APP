@@ -12,7 +12,7 @@ interface WeeklyActivityChartProps {
   mutedColor: string;
 }
 
-const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+const DAY_LABELS = ["S", "M", "T", "W", "Th", "F", "Sat"];
 
 function bucketLast7Days(todos: Todo[]) {
   const now = new Date();
@@ -82,6 +82,7 @@ const createStyles = () =>
       alignItems: "flex-end",
       height: 110,
       paddingTop: 4,
+      paddingBottom: 4,
     },
     column: {
       flex: 1,

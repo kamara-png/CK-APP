@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     paddingTop: 60,
+    paddingBottom: 20,
     paddingHorizontal: 20,
     elevation: 12,
     shadowColor: "#000",

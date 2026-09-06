@@ -1,9 +1,9 @@
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
-import HabitEditor from "@/components/HabitEditor";
 import BouncyIcon from "@/components/BouncyIcon";
+import HabitEditor from "@/components/HabitEditor";
 import SwipeableRow from "@/components/SwipeableRow";
 import SwipeTabScreen from "@/components/SwipeTabScreen";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import useTheme from "@/hooks/useTheme";
 import { computeStreakStats, getLast7Days, getLocalDateKey } from "@/lib/streaks";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,7 +19,7 @@ import {
   View,
 } from "react-native";
 
-const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+const DAY_LABELS = ["S", "M", "T", "W", "Th", "F", "Sat"];
 
 export default function StreaksScreen() {
   const { colors } = useTheme();
@@ -38,7 +38,7 @@ export default function StreaksScreen() {
   };
 
   const handleDelete = (id: Id<"habits">, name: string) => {
-    Alert.alert(`Delete "${name}"?`, "This removes its whole check-in history.", [
+    Alert.alert(`Delete "${name}"?`, "This removes all your progress man.", [
       { text: "Cancel", style: "cancel" },
       { text: "Delete", style: "destructive", onPress: () => deleteHabit({ id }) },
     ]);
@@ -49,9 +49,6 @@ export default function StreaksScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Streaks</Text>
-        <TouchableOpacity onPress={() => setEditorOpen(true)}>
-          <Ionicons name="add-circle" size={28} color={colors.primary} />
-        </TouchableOpacity>
       </View>
 
       {overview === undefined ? (
@@ -109,6 +106,7 @@ export default function StreaksScreen() {
                         },
                       ]}
                     >
+                      
                       <BouncyIcon active={checkedInToday}>
                         <Ionicons
                           name={checkedInToday ? "flame" : "flame-outline"}
@@ -117,6 +115,7 @@ export default function StreaksScreen() {
                         />
                       </BouncyIcon>
                     </TouchableOpacity>
+                    
                   </View>
 
                   <View style={styles.weekRow}>
@@ -149,6 +148,13 @@ export default function StreaksScreen() {
         onClose={() => setEditorOpen(false)}
       />
     </View>
+    <View>
+      <TouchableOpacity
+                style={[styles.fab, { backgroundColor: colors.primary }]}
+                onPress={() => setEditorOpen(true)} >
+                <Ionicons name="add" size={30} color="#fff" />
+              </TouchableOpacity>
+    </View>
     </SwipeTabScreen>
   );
 }
@@ -168,9 +174,24 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       marginBottom: 16,
     },
     title: {
-      fontSize: 28,
-      fontWeight: "700",
+      fontSize: 30,
+      fontWeight: "900",
       color: colors.text,
+    },
+     fab: {
+      position: "absolute",
+      right: 20,
+      bottom: 30,
+      width: 58,
+      height: 58,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      elevation: 6,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.3,
+      shadowRadius: 5,
     },
     empty: {
       color: colors.textMuted,

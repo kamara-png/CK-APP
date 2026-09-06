@@ -20,7 +20,7 @@ const TabsLayout = () => {
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: "600",
+          fontWeight: "900",
         },
         headerShown: false,
       }}
@@ -30,7 +30,7 @@ const TabsLayout = () => {
         options={{
           title: "Todos",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="flash-outline" size={size} color={color} />
+            <Ionicons name="flash" size={size} color={color} />
           ),
         }}
       />
@@ -39,16 +39,16 @@ const TabsLayout = () => {
         options={{
           title: "Streaks",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="flame-outline" size={size} color={color} />
+            <Ionicons name="flame" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="statistics"
         options={{
-          title: "Statistics",
+          title: "Stats",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bar-chart-outline" size={size} color={color} />
+            <Ionicons name="bar-chart" size={size} color={color} />
           ),
         }}
       />

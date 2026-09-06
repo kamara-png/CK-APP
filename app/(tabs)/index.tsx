@@ -1,5 +1,3 @@
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
 import AddTodoModal from "@/components/AddTodoModal";
 import BouncyIcon from "@/components/BouncyIcon";
 import ProfileContent from "@/components/ProfileContent";
@@ -9,8 +7,10 @@ import SwipeableRow from "@/components/SwipeableRow";
 import SwipeTabScreen from "@/components/SwipeTabScreen";
 import TodoEditor from "@/components/TodoEditor";
 import UndoToast from "@/components/UndoToast";
-import useTheme from "@/hooks/useTheme";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { useSlowLoadingHint } from "@/hooks/useSlowLoadingHint";
+import useTheme from "@/hooks/useTheme";
 import {
   cancelTodoReminder,
   ensureNotificationPermission,
@@ -56,6 +56,7 @@ export default function Index() {
   const [search, setSearch] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Id<"todos"> | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<Id<"todos"> | null>(null);
   const deleteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -80,7 +81,8 @@ export default function Index() {
   const handleCreate = async (text: string) => {
     setAddModalOpen(false);
     const todoId = await addTodo({ text });
-    // Bake the reminder into the creation flow: offer to set one right after.
+
+    // Will ask to place reminder after creation.
     setReminderTarget({ kind: "existing", id: todoId });
   };
 
@@ -103,7 +105,7 @@ export default function Index() {
   };
 
   const handleSwipeOrIconDelete = (id: Id<"todos">) => {
-    // Optimistically hide it, give a short window to undo before the real delete.
+    // undo timer ya 1 sec
     setPendingDeleteId(id);
     if (deleteTimer.current) clearTimeout(deleteTimer.current);
     deleteTimer.current = setTimeout(() => {
@@ -158,7 +160,7 @@ export default function Index() {
             style={styles.searchInput}
             value={search}
             onChangeText={setSearch}
-            placeholder="Search todos..."
+            placeholder="Search tasks?..."
             placeholderTextColor={colors.textMuted}
           />
         </View>
@@ -180,7 +182,7 @@ export default function Index() {
             contentContainerStyle={styles.list}
             ListEmptyComponent={
               <Text style={styles.empty}>
-                {todos.length === 0 ? "No todos yet — tap + to add one." : "No matches."}
+                {todos.length === 0 ? "No todos yet , tap + to add one." : "hakuna match."}
               </Text>
             }
             renderItem={({ item, index }) => {
@@ -228,7 +230,7 @@ export default function Index() {
                           </Text>
                           {item.reminderAt && (
                             <View style={styles.reminderChip}>
-                              <Ionicons name="alarm-outline" size={12} color={colors.primary} />
+                              <Ionicons name="alarm" size={12} color={colors.primary} />
                               <Text style={styles.reminderChipText}>
                                 {new Date(item.reminderAt).toLocaleString(undefined, {
                                   month: "short",
@@ -245,12 +247,12 @@ export default function Index() {
                         onPress={() => setEditTarget(item._id as Id<"todos">)}
                         style={{ paddingHorizontal: 6 }}
                       >
-                        <Ionicons name="pencil-outline" size={18} color={colors.textMuted} />
+                        <Ionicons name="pencil" size={18} color={colors.textMuted} />
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => handleSwipeOrIconDelete(item._id as Id<"todos">)}
                       >
-                        <Ionicons name="trash-outline" size={20} color={colors.danger} />
+                        <Ionicons name="trash" size={20} color={colors.danger} />
                       </TouchableOpacity>
                     </View>
                   </SwipeableRow>
@@ -282,6 +284,7 @@ export default function Index() {
         onClose={() => setAddModalOpen(false)}
       />
 
+        // i can add custom reminder sound hapa but ikae kwa assets 
       <ReminderEditor
         visible={reminderTarget !== null}
         initialDate={new Date(Date.now() + 60 * 60 * 1000)}
@@ -329,8 +332,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       alignItems: "center",
     },
     title: {
-      fontSize: 28,
-      fontWeight: "700",
+      fontSize: 30,
+      fontWeight: "900",
       color: colors.text,
     },
     searchRow: {
@@ -377,7 +380,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     checkbox: {
       width: 28,
       height: 28,
-      borderRadius: 9,
+      borderRadius: 10,
       borderWidth: 2,
       alignItems: "center",
       justifyContent: "center",
@@ -421,7 +424,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       bottom: 30,
       width: 58,
       height: 58,
-      borderRadius: 29,
+      borderRadius: 18,
       alignItems: "center",
       justifyContent: "center",
       elevation: 6,

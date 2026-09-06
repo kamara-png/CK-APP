@@ -68,15 +68,15 @@ const Preferences = () => {
                 {option.label}
               </Text>
               {active && (
-                <Ionicons name="checkmark-circle" size={16} color={colors.primary} />
+                <Ionicons name="checkmark" size={16} color={colors.primary} />
               )}
             </TouchableOpacity>
           );
         })}
       </View>
       <Text style={styles.subnote}>
-        Each theme has its own light and dark look — the switch above applies to
-        whichever one you pick.
+        Each theme has its own light and dark look, the switch above changes the
+        appearance of the app to whichever one you pick.
       </Text>
     </View>
   );
@@ -85,15 +85,15 @@ const Preferences = () => {
 const createLocalStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
   StyleSheet.create({
     label: {
-      fontSize: 14,
-      fontWeight: "600",
+      fontSize: 20,
+      fontWeight: "700",
       color: colors.textMuted,
       marginTop: 16,
       marginBottom: 12,
     },
     themeGrid: {
-      flexDirection: "row",
-      flexWrap: "wrap",
+      flexDirection: "column",
+      alignItems: "stretch",
       gap: 12,
     },
     themeOption: {

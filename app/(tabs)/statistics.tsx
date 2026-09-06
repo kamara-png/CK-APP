@@ -1,9 +1,9 @@
-import { api } from "@/convex/_generated/api";
 import ProgressRing from "@/components/ProgressRing";
 import SwipeTabScreen from "@/components/SwipeTabScreen";
 import WeeklyActivityChart from "@/components/WeeklyActivityChart";
-import useTheme from "@/hooks/useTheme";
+import { api } from "@/convex/_generated/api";
 import { useSlowLoadingHint } from "@/hooks/useSlowLoadingHint";
+import useTheme from "@/hooks/useTheme";
 import { computeStreakStats } from "@/lib/streaks";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
@@ -63,23 +63,23 @@ const StatisticsScreen = () => {
       : null;
 
   const cards = [
-    { label: "Total", value: total, icon: "list-outline", color: colors.primary },
-    { label: "Completed", value: completed, icon: "checkmark-circle-outline", color: colors.success },
-    { label: "Remaining", value: remaining, icon: "time-outline", color: colors.warning },
+    { label: "Total Tasks", value: total, icon: "list", color: colors.primary },
+    { label: "Done", value: completed, icon: "checkmark-circle", color: colors.success },
+    { label: "Remaining", value: remaining, icon: "time", color: colors.warning },
   ] as const;
 
   const productivityCards = [
-    { label: "Done today", value: String(completedToday), icon: "today-outline", color: colors.success },
+    { label: "Done today", value: String(completedToday), icon: "today", color: colors.success },
     {
       label: "Avg. to finish",
       value: avgCompletionMs !== null ? formatDuration(avgCompletionMs) : "—",
-      icon: "hourglass-outline",
+      icon: "hourglass",
       color: colors.primary,
     },
     {
       label: "Reminders set",
       value: String(upcomingReminders),
-      icon: "alarm-outline",
+      icon: "alarm",
       color: colors.warning,
     },
   ] as const;
@@ -194,17 +194,17 @@ const StatisticsScreen = () => {
               <Text style={styles.sectionTitle}>Streaks overview</Text>
               <View style={styles.cardsRow}>
                 <View style={styles.miniCard}>
-                  <Ionicons name="flame-outline" size={18} color={colors.danger} />
+                  <Ionicons name="flame" size={18} color={colors.danger} />
                   <Text style={styles.miniCardValue}>{habitsWithStats.length}</Text>
                   <Text style={styles.cardLabel}>Active streaks</Text>
                 </View>
                 <View style={styles.miniCard}>
-                  <Ionicons name="trophy-outline" size={18} color={colors.warning} />
+                  <Ionicons name="trophy" size={18} color={colors.warning} />
                   <Text style={styles.miniCardValue}>{bestStreak}</Text>
                   <Text style={styles.cardLabel}>Best streak</Text>
                 </View>
                 <View style={styles.miniCard}>
-                  <Ionicons name="checkmark-done-outline" size={18} color={colors.success} />
+                  <Ionicons name="checkmark-done" size={18} color={colors.success} />
                   <Text style={styles.miniCardValue}>{totalCheckins}</Text>
                   <Text style={styles.cardLabel}>Check-ins</Text>
                 </View>
@@ -217,17 +217,17 @@ const StatisticsScreen = () => {
               <Text style={styles.sectionTitle}>Notes overview</Text>
               <View style={styles.cardsRow}>
                 <View style={styles.miniCard}>
-                  <Ionicons name="document-text-outline" size={18} color={colors.primary} />
+                  <Ionicons name="document-text" size={18} color={colors.primary} />
                   <Text style={styles.miniCardValue}>{notesList.length}</Text>
                   <Text style={styles.cardLabel}>Total notes</Text>
                 </View>
                 <View style={styles.miniCard}>
-                  <Ionicons name="create-outline" size={18} color={colors.success} />
+                  <Ionicons name="person" size={18} color={colors.success} />
                   <Text style={styles.miniCardValue}>{totalWords}</Text>
                   <Text style={styles.cardLabel}>Words written</Text>
                 </View>
                 <View style={styles.miniCard}>
-                  <Ionicons name="time-outline" size={18} color={colors.warning} />
+                  <Ionicons name="time" size={18} color={colors.warning} />
                   <Text style={styles.miniCardValue}>{notesThisWeek}</Text>
                   <Text style={styles.cardLabel}>Edited this week</Text>
                 </View>
@@ -254,8 +254,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       alignItems: "center",
     },
     title: {
-      fontSize: 28,
-      fontWeight: "700",
+      fontSize: 30,
+      fontWeight: "900",
       color: colors.text,
       marginBottom: 20,
     },
@@ -268,7 +268,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     },
     ringPercent: {
       fontSize: 28,
-      fontWeight: "700",
+      fontWeight: "900",
       color: colors.text,
     },
     ringLabel: {
@@ -320,7 +320,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     },
     sectionTitle: {
       color: colors.text,
-      fontWeight: "600",
+      fontWeight: "800",
       marginBottom: 14,
     },
     barsRow: {

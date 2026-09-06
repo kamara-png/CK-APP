@@ -1,9 +1,9 @@
+import DateTimeField from "@/components/DateTimeField";
+import { ColorScheme } from "@/hooks/useTheme";
+import { ReminderSound } from "@/lib/notifications";
+import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import DateTimeField from "@/components/DateTimeField";
-import { ReminderSound } from "@/lib/notifications";
-import { ColorScheme } from "@/hooks/useTheme";
 
 const SOUND_OPTIONS: { value: ReminderSound; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { value: "default", label: "Default", icon: "notifications" },
@@ -78,7 +78,7 @@ export default function TodoEditor({
             onPress={() => setReminderOn((v) => !v)}
           >
             <Ionicons
-              name={reminderOn ? "alarm" : "alarm-outline"}
+              name={reminderOn ? "alarm" : "alarm"}
               size={18}
               color={reminderOn ? colors.primary : colors.textMuted}
             />
@@ -160,8 +160,8 @@ const createStyles = (colors: ColorScheme) =>
       marginBottom: 16,
     },
     title: {
-      fontSize: 18,
-      fontWeight: "700",
+      fontSize: 28,
+      fontWeight: "900",
       color: colors.text,
     },
     input: {
