@@ -7,6 +7,8 @@ import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "reac
 
 const SOUND_OPTIONS: { value: ReminderSound; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { value: "default", label: "Default", icon: "notifications" },
+  { value: "alarm", label: "Alarm", icon: "alarm" },
+  { value: "chime", label: "Chime", icon: "musical-notes" },
   { value: "silent", label: "Silent", icon: "notifications-off" },
 ];
 

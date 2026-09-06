@@ -12,7 +12,12 @@ export const addTodo = mutation({
     args: {
         text:v.string(),
         reminderAt: v.optional(v.number()),
-        reminderSound: v.optional(v.union(v.literal("default"), v.literal("silent"))),
+        reminderSound: v.optional(v.union(
+            v.literal("default"),
+            v.literal("alarm"),
+            v.literal("chime"),
+            v.literal("silent")
+        )),
     },
     handler: async(ctx,args) => {
         const todoId =await ctx.db.insert("todos", {
@@ -30,7 +35,12 @@ export const addTodo = mutation({
         args: {
             id: v.id("todos"),
             reminderAt: v.optional(v.number()),
-            reminderSound: v.optional(v.union(v.literal("default"), v.literal("silent"))),
+            reminderSound: v.optional(v.union(
+                v.literal("default"),
+                v.literal("alarm"),
+                v.literal("chime"),
+                v.literal("silent")
+            )),
         },
         handler: async(ctx,args) => {
             const todo = await ctx.db.get(args.id)
@@ -90,4 +100,3 @@ export const addTodo = mutation({
             return {deletedCount: todos.length };
         },
     });
-    

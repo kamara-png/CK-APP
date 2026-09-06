@@ -27,7 +27,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "sounds": [
+            "./assets/sounds/ck-alarm.wav",
+            "./assets/sounds/ck-chime.wav"
+          ]
+        }
+      ],
       [
         "expo-image-picker",
         {

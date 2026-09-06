@@ -1,7 +1,21 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
-export type ReminderSound = "default" | "silent";
+export type ReminderSound = "default" | "alarm" | "chime" | "silent";
+
+const channelForSound: Record<ReminderSound, string> = {
+  default: "todo-reminders-default",
+  alarm: "todo-reminders-alarm",
+  chime: "todo-reminders-chime",
+  silent: "todo-reminders-silent",
+};
+
+const notificationSound: Record<ReminderSound, string | false> = {
+  default: "default",
+  alarm: "ck-alarm.wav",
+  chime: "ck-chime.wav",
+  silent: false,
+};
 
 let configured = false;
 
@@ -23,11 +37,28 @@ export function configureNotifications() {
   });
 
   if (Platform.OS === "android") {
-    Notifications.setNotificationChannelAsync("todo-reminders", {
-      name: "Todo reminders",
-      importance: Notifications.AndroidImportance.HIGH,
-      sound: "default",
-    });
+    void Promise.all([
+      Notifications.setNotificationChannelAsync(channelForSound.default, {
+        name: "Todo reminders — Default",
+        importance: Notifications.AndroidImportance.HIGH,
+        sound: "default",
+      }),
+      Notifications.setNotificationChannelAsync(channelForSound.alarm, {
+        name: "Todo reminders — Alarm",
+        importance: Notifications.AndroidImportance.HIGH,
+        sound: "ck-alarm.wav",
+      }),
+      Notifications.setNotificationChannelAsync(channelForSound.chime, {
+        name: "Todo reminders — Chime",
+        importance: Notifications.AndroidImportance.HIGH,
+        sound: "ck-chime.wav",
+      }),
+      Notifications.setNotificationChannelAsync(channelForSound.silent, {
+        name: "Todo reminders — Silent",
+        importance: Notifications.AndroidImportance.DEFAULT,
+        sound: null,
+      }),
+    ]);
   }
 }
 
@@ -65,12 +96,12 @@ export async function scheduleTodoReminder(
     content: {
       title: "Todo reminder",
       body: text,
-      sound: sound === "silent" ? false : true,
+      sound: notificationSound[sound],
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DATE,
       date,
-      channelId: Platform.OS === "android" ? "todo-reminders" : undefined,
+      channelId: Platform.OS === "android" ? channelForSound[sound] : undefined,
     },
   });
 }

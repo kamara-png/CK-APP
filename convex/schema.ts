@@ -8,7 +8,12 @@ export default defineSchema({
         iscompleted:v.boolean(),
         completedAt: v.optional(v.number()),
         reminderAt: v.optional(v.number()),
-        reminderSound: v.optional(v.union(v.literal("default"), v.literal("silent"))),
+        reminderSound: v.optional(v.union(
+            v.literal("default"),
+            v.literal("alarm"),
+            v.literal("chime"),
+            v.literal("silent")
+        )),
 }),
     notes: defineTable({
         title: v.string(),
