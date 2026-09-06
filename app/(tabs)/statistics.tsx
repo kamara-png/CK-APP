@@ -63,13 +63,13 @@ const StatisticsScreen = () => {
       : null;
 
   const cards = [
-    { label: "Total Tasks", value: total, icon: "list", color: colors.primary },
-    { label: "Done", value: completed, icon: "checkmark-circle", color: colors.success },
-    { label: "Remaining", value: remaining, icon: "time", color: colors.warning },
+    { label: "Total Tasks", value: total, icon: "library", color: colors.primary },
+    { label: "Done", value: completed, icon: "checkmark-done-circle", color: colors.success },
+    { label: "Remaining", value: remaining, icon: "timer", color: colors.warning },
   ] as const;
 
   const productivityCards = [
-    { label: "Done today", value: String(completedToday), icon: "today", color: colors.success },
+    { label: "Done today", value: String(completedToday), icon: "clipboard", color: colors.success },
     {
       label: "Avg. to finish",
       value: avgCompletionMs !== null ? formatDuration(avgCompletionMs) : "—",
@@ -122,7 +122,7 @@ const StatisticsScreen = () => {
           <View style={styles.cardsRow}>
             {cards.map((card) => (
               <View key={card.label} style={styles.card}>
-                <Ionicons name={card.icon} size={22} color={card.color} />
+                <Ionicons name={card.icon} size={30} color={card.color} />
                 <Text style={styles.cardValue}>{card.value}</Text>
                 <Text style={styles.cardLabel}>{card.label}</Text>
               </View>
@@ -134,7 +134,7 @@ const StatisticsScreen = () => {
             <View style={styles.cardsRow}>
               {productivityCards.map((card) => (
                 <View key={card.label} style={styles.miniCard}>
-                  <Ionicons name={card.icon} size={18} color={card.color} />
+                  <Ionicons name={card.icon} size={30} color={card.color} />
                   <Text style={styles.miniCardValue}>{card.value}</Text>
                   <Text style={styles.cardLabel}>{card.label}</Text>
                 </View>
@@ -194,17 +194,17 @@ const StatisticsScreen = () => {
               <Text style={styles.sectionTitle}>Streaks overview</Text>
               <View style={styles.cardsRow}>
                 <View style={styles.miniCard}>
-                  <Ionicons name="flame" size={18} color={colors.danger} />
+                  <Ionicons name="flame" size={30} color={colors.danger} />
                   <Text style={styles.miniCardValue}>{habitsWithStats.length}</Text>
                   <Text style={styles.cardLabel}>Active streaks</Text>
                 </View>
                 <View style={styles.miniCard}>
-                  <Ionicons name="trophy" size={18} color={colors.warning} />
+                  <Ionicons name="ribbon" size={30} color={colors.warning} />
                   <Text style={styles.miniCardValue}>{bestStreak}</Text>
                   <Text style={styles.cardLabel}>Best streak</Text>
                 </View>
                 <View style={styles.miniCard}>
-                  <Ionicons name="checkmark-done" size={18} color={colors.success} />
+                  <Ionicons name="checkmark-done-circle" size={30} color={colors.success} />
                   <Text style={styles.miniCardValue}>{totalCheckins}</Text>
                   <Text style={styles.cardLabel}>Check-ins</Text>
                 </View>
@@ -217,17 +217,17 @@ const StatisticsScreen = () => {
               <Text style={styles.sectionTitle}>Notes overview</Text>
               <View style={styles.cardsRow}>
                 <View style={styles.miniCard}>
-                  <Ionicons name="document-text" size={18} color={colors.primary} />
+                  <Ionicons name="book" size={30} color={colors.primary} />
                   <Text style={styles.miniCardValue}>{notesList.length}</Text>
                   <Text style={styles.cardLabel}>Total notes</Text>
                 </View>
                 <View style={styles.miniCard}>
-                  <Ionicons name="person" size={18} color={colors.success} />
+                  <Ionicons name="document-text" size={30} color={colors.success} />
                   <Text style={styles.miniCardValue}>{totalWords}</Text>
                   <Text style={styles.cardLabel}>Words written</Text>
                 </View>
                 <View style={styles.miniCard}>
-                  <Ionicons name="time" size={18} color={colors.warning} />
+                  <Ionicons name="create" size={30} color={colors.warning} />
                   <Text style={styles.miniCardValue}>{notesThisWeek}</Text>
                   <Text style={styles.cardLabel}>Edited this week</Text>
                 </View>
@@ -258,6 +258,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       fontWeight: "900",
       color: colors.text,
       marginBottom: 20,
+      alignSelf: "center",
+      textAlign: "center",
     },
     ringSection: {
       alignItems: "center",

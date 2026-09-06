@@ -1,7 +1,7 @@
+import { ColorScheme } from "@/hooks/useTheme";
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { ColorScheme } from "@/hooks/useTheme";
 
 interface AddTodoModalProps {
   visible: boolean;
@@ -26,8 +26,9 @@ export default function AddTodoModal({ visible, colors, onSubmit, onClose }: Add
       <View style={styles.backdrop}>
         <View style={styles.card}>
           <View style={styles.header}>
+            <View style={styles.headerSide} />
             <Text style={styles.title}>New todo</Text>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity onPress={onClose} style={styles.headerSide}>
               <Ionicons name="close" size={22} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
@@ -76,7 +77,10 @@ const createStyles = (colors: ColorScheme) =>
       fontSize: 18,
       fontWeight: "700",
       color: colors.text,
+      flex: 1,
+      textAlign: "center",
     },
+    headerSide: { width: 22 },
     input: {
       borderWidth: 1,
       borderColor: colors.border,

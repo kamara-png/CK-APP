@@ -1,9 +1,9 @@
+import DateTimeField from "@/components/DateTimeField";
+import { ColorScheme } from "@/hooks/useTheme";
+import { ReminderSound } from "@/lib/notifications";
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import DateTimeField from "@/components/DateTimeField";
-import { ReminderSound } from "@/lib/notifications";
-import { ColorScheme } from "@/hooks/useTheme";
 
 interface ReminderEditorProps {
   visible: boolean;
@@ -42,8 +42,9 @@ export default function ReminderEditor({
       <View style={styles.backdrop}>
         <View style={styles.card}>
           <View style={styles.header}>
+            <View style={styles.headerSide} />
             <Text style={styles.title}>Set reminder</Text>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity onPress={onClose} style={styles.headerSide}>
               <Ionicons name="close" size={22} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
@@ -136,7 +137,10 @@ const createStyles = (colors: ColorScheme) =>
       fontSize: 18,
       fontWeight: "700",
       color: colors.text,
+      flex: 1,
+      textAlign: "center",
     },
+    headerSide: { width: 22 },
     label: {
       fontSize: 13,
       fontWeight: "600",

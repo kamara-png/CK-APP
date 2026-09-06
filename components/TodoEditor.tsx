@@ -59,8 +59,9 @@ export default function TodoEditor({
       <View style={styles.backdrop}>
         <View style={styles.card}>
           <View style={styles.header}>
+            <View style={styles.headerSide} />
             <Text style={styles.title}>Edit todo</Text>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity onPress={onClose} style={styles.headerSide}>
               <Ionicons name="close" size={22} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
@@ -166,7 +167,10 @@ const createStyles = (colors: ColorScheme) =>
       fontSize: 28,
       fontWeight: "900",
       color: colors.text,
+      flex: 1,
+      textAlign: "center",
     },
+    headerSide: { width: 22 },
     input: {
       borderWidth: 1,
       borderColor: colors.border,

@@ -48,7 +48,7 @@ const TabsLayout = () => {
         options={{
           title: "Stats",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bar-chart" size={size} color={color} />
+            <Ionicons name="podium" size={size} color={color} />
           ),
         }}
       />

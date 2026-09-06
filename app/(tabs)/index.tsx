@@ -151,14 +151,12 @@ export default function Index() {
     <SwipeTabScreen path="/">
       <View style={styles.container}>
         <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <TouchableOpacity onPress={() => setDrawerOpen(true)} style={{ marginRight: 12 }}>
-              <Ionicons name="menu" size={26} color={colors.text} />
-            </TouchableOpacity>
-            <Text style={styles.title}>Todos</Text>
-          </View>
+          <TouchableOpacity onPress={() => setDrawerOpen(true)} style={styles.headerAction}>
+            <Ionicons name="ellipsis-vertical" size={30} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.title}>To-dos</Text>
           <TouchableOpacity onPress={() => router.push("/notes")}>
-            <Ionicons name="document-text-outline" size={24} color={colors.text} />
+            <Ionicons name="duplicate-outline" size={30} color={colors.text} />
           </TouchableOpacity>
         </View>
 
@@ -168,7 +166,7 @@ export default function Index() {
             style={styles.searchInput}
             value={search}
             onChangeText={setSearch}
-            placeholder="Search tasks?..."
+            placeholder="Search your tasks..."
             placeholderTextColor={colors.textMuted}
           />
         </View>
@@ -190,7 +188,7 @@ export default function Index() {
             contentContainerStyle={styles.list}
             ListEmptyComponent={
               <Text style={styles.empty}>
-                {todos.length === 0 ? "No todos yet , tap + to add one." : "hakuna match."}
+                {todos.length === 0 ? "No todos yet , tap + to add moja tu." : "hakuna match."}
               </Text>
             }
             renderItem={({ item, index }) => {
@@ -255,7 +253,7 @@ export default function Index() {
                         onPress={() => setEditTarget(item._id as Id<"todos">)}
                         style={{ paddingHorizontal: 6 }}
                       >
-                        <Ionicons name="pencil" size={18} color={colors.textMuted} />
+                        <Ionicons name="color-wand" size={18} color={colors.textMuted} />
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => handleSwipeOrIconDelete(item._id as Id<"todos">)}
@@ -334,13 +332,12 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       alignItems: "center",
       marginBottom: 16,
     },
-    headerLeft: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
+    headerAction: { width: 30 },
     title: {
       fontSize: 30,
       fontWeight: "900",
+      flex: 1,
+      textAlign: "center",
       color: colors.text,
     },
     searchRow: {

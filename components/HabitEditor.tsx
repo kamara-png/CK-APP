@@ -1,7 +1,7 @@
+import { ColorScheme } from "@/hooks/useTheme";
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { ColorScheme } from "@/hooks/useTheme";
 
 const PRESET_COLORS = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ec4899"];
 
@@ -30,8 +30,9 @@ export default function HabitEditor({ visible, colors, onSave, onClose }: HabitE
       <View style={styles.backdrop}>
         <View style={styles.card}>
           <View style={styles.header}>
+            <View style={styles.headerSide} />
             <Text style={styles.title}>New streak</Text>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity onPress={onClose} style={styles.headerSide}>
               <Ionicons name="close" size={22} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
@@ -96,7 +97,10 @@ const createStyles = (colors: ColorScheme) =>
       fontSize: 18,
       fontWeight: "700",
       color: colors.text,
+      flex: 1,
+      textAlign: "center",
     },
+    headerSide: { width: 22 },
     label: {
       fontSize: 13,
       fontWeight: "600",

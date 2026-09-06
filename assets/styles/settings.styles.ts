@@ -27,8 +27,8 @@ export const createSettingsStyles = (colors: ColorScheme) => {
       marginRight: 16,
     },
     title: {
-      fontSize: 32,
-      fontWeight: "700",
+      fontSize: 30,
+      fontWeight: "900",
       letterSpacing: -1,
       color: colors.text,
     },
@@ -57,7 +57,8 @@ export const createSettingsStyles = (colors: ColorScheme) => {
       fontWeight: "700",
       marginBottom: 20,
       letterSpacing: -0.5,
-      color: colors.text,
+      color: colors.text, 
+      textAlign: "center",
     },
     sectionTitleDanger: {
       fontSize: 20,
@@ -65,6 +66,7 @@ export const createSettingsStyles = (colors: ColorScheme) => {
       marginBottom: 20,
       letterSpacing: -0.5,
       color: colors.danger,
+      textAlign: "center",
     },
     statsContainer: {
       gap: 16,

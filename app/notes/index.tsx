@@ -1,6 +1,6 @@
+import SwipeableRow from "@/components/SwipeableRow";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import SwipeableRow from "@/components/SwipeableRow";
 import useTheme from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
@@ -8,13 +8,13 @@ import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  Alert,
 } from "react-native";
 
 function timeAgo(ms: number) {
@@ -56,7 +56,7 @@ export default function NotesListScreen() {
     Alert.alert("Delete note?", "This note will be permanently removed.", [
       { text: "Cancel", style: "cancel" },
       {
-        text: "Delete",
+        text: "Delete it?",
         style: "destructive",
         onPress: () => deleteNote({ id }),
       },
@@ -103,7 +103,7 @@ export default function NotesListScreen() {
               deleteColor={colors.danger}
               leftLabel="Edit"
               rightLabel="Delete"
-              leftIcon="pencil"
+              leftIcon="color-wand"
               onSwipeComplete={() => router.push(`/notes/${item._id}`)}
               onSwipeDelete={() => handleDelete(item._id)}
             >
@@ -118,7 +118,7 @@ export default function NotesListScreen() {
                   <Text style={styles.noteTitle} numberOfLines={1}>
                     {item.title.trim() || "Untitled"}
                   </Text>
-                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                  <Ionicons name="caret-forward" size={18} color={colors.textMuted} />
                 </View>
                 <Text style={styles.noteSnippet} numberOfLines={2}>
                   {item.content.trim() || "Start writing your thought…"}
@@ -157,6 +157,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       fontSize: 30,
       fontWeight: "900",
       color: colors.text,
+      flex: 1,
+      textAlign: "center",
     },
     headerSpacer: { width: 34 },
     searchRow: {

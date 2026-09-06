@@ -177,6 +177,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       fontSize: 30,
       fontWeight: "900",
       color: colors.text,
+      flex: 1,
+      textAlign: "center",
     },
      fab: {
       position: "absolute",
