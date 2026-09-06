@@ -55,6 +55,7 @@ export default function NotesListScreen() {
           <Ionicons name="chevron-back" size={26} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.title}>Notes</Text>
+        <View style={styles.headerSpacer} />
       </View>
 
       <View style={styles.searchRow}>
@@ -99,13 +100,12 @@ export default function NotesListScreen() {
           )}
         />
       )}
-      <View>
       <TouchableOpacity
-                style={[styles.fab, { backgroundColor: colors.primary }]}
-                onPress={() => handleCreate()} >
-                <Ionicons name="add" size={30} color="#fff" />
-              </TouchableOpacity>
-    </View>
+        style={[styles.fab, { backgroundColor: colors.primary }]}
+        onPress={handleCreate}
+      >
+        <Ionicons name="add" size={30} color="#fff" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -128,9 +128,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       fontSize: 30,
       fontWeight: "900",
       color: colors.text,
-      right: 270,
-      position: "absolute",
     },
+    headerSpacer: { width: 34 },
     searchRow: {
       flexDirection: "row",
       alignItems: "center",

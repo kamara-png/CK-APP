@@ -7,7 +7,7 @@ import useTheme from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { useConvex, useMutation, useQuery } from "convex/react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -50,6 +50,20 @@ export default function NoteEditorScreen() {
   const [customPickerOpen, setCustomPickerOpen] = useState(false);
   const loadedRef = useRef(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestNoteRef = useRef({ title, content, color });
+
+  useEffect(() => {
+    latestNoteRef.current = { title, content, color };
+  }, [title, content, color]);
+
+  const saveLatestNote = useCallback(async () => {
+    if (!loadedRef.current) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    const latest = latestNoteRef.current;
+    setSavedState("saving");
+    await updateNote({ id: noteId, ...latest });
+    setSavedState("saved");
+  }, [noteId, updateNote]);
 
   useEffect(() => {
     if (note && !loadedRef.current) {
@@ -64,16 +78,19 @@ export default function NoteEditorScreen() {
     if (!loadedRef.current) return;
     setSavedState("saving");
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(async () => {
-      await updateNote({ id: noteId, title, content, color });
-      setSavedState("saved");
+    saveTimer.current = setTimeout(() => {
+      void saveLatestNote();
     }, AUTOSAVE_DELAY_MS);
 
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, content, color]);
+  }, [title, content, color, saveLatestNote]);
+
+  const handleBack = async () => {
+    await saveLatestNote();
+    router.back();
+  };
 
   const applyFormat = (action: FormatAction) => {
     const { start, end } = selection;
@@ -161,6 +178,7 @@ export default function NoteEditorScreen() {
         text: "Delete",
         style: "destructive",
         onPress: async () => {
+          if (saveTimer.current) clearTimeout(saveTimer.current);
           await deleteNote({ id: noteId });
           router.back();
         },
@@ -190,7 +208,7 @@ export default function NoteEditorScreen() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
+          <TouchableOpacity onPress={handleBack} style={{ padding: 4 }}>
             <Ionicons name="chevron-back" size={26} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.savedLabel}>{savedState === "saving" ? "Saving…" : "Saved"}</Text>

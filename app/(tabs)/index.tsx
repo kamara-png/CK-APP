@@ -20,7 +20,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "expo-router";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -33,7 +33,7 @@ import {
 
 type ReminderTarget = { kind: "existing"; id: Id<"todos"> };
 
-const UNDO_WINDOW_MS = 1000;
+const UNDO_WINDOW_MS = 3_000;
 
 function dayKey(ms: number) {
   const d = new Date(ms);
@@ -71,6 +71,12 @@ export default function Index() {
 
   const [reminderTarget, setReminderTarget] = useState<ReminderTarget | null>(null);
 
+  useEffect(() => {
+    return () => {
+      if (deleteTimer.current) clearTimeout(deleteTimer.current);
+    };
+  }, []);
+
   const visibleTodos = useMemo(() => {
     if (!todos) return [];
     const q = search.trim().toLowerCase();
@@ -105,12 +111,14 @@ export default function Index() {
   };
 
   const handleSwipeOrIconDelete = (id: Id<"todos">) => {
-    // undo timer ya 1 sec
     setPendingDeleteId(id);
     if (deleteTimer.current) clearTimeout(deleteTimer.current);
     deleteTimer.current = setTimeout(() => {
-      deleteTodo({ id });
-      setPendingDeleteId(null);
+      void (async () => {
+        await cancelTodoReminder(id);
+        await deleteTodo({ id });
+        setPendingDeleteId(null);
+      })();
     }, UNDO_WINDOW_MS);
   };
 
@@ -284,7 +292,6 @@ export default function Index() {
         onClose={() => setAddModalOpen(false)}
       />
 
-        // i can add custom reminder sound hapa but ikae kwa assets 
       <ReminderEditor
         visible={reminderTarget !== null}
         initialDate={new Date(Date.now() + 60 * 60 * 1000)}
