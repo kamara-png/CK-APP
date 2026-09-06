@@ -50,6 +50,11 @@ export default function SwipeTabScreen({ path, children }: SwipeTabScreenProps) 
     lastFocusedIndex = currentIndex;
   }, [currentIndex]);
 
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateX: translateX.value }, { scale: scale.value }],
+  }));
+
   const goTo = (index: number) => {
     if (index < 0 || index >= TAB_ORDER.length) return;
     router.navigate(TAB_ORDER[index]);
@@ -70,13 +75,7 @@ export default function SwipeTabScreen({ path, children }: SwipeTabScreenProps) 
   return (
     <GestureDetector gesture={pan}>
       <Animated.View
-        style={[
-          { flex: 1 },
-          useAnimatedStyle(() => ({
-            opacity: opacity.value,
-            transform: [{ translateX: translateX.value }, { scale: scale.value }],
-          })),
-        ]}
+        style={[{ flex: 1 }, animatedStyle]}
       >
         {children}
       </Animated.View>
