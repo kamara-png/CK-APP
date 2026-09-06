@@ -1,9 +1,16 @@
 import { ThemeProvider } from "@/hooks/useTheme";
 import { configureNotifications } from "@/lib/notifications";
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  useFonts,
+} from "@expo-google-fonts/inter";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const convexUrl = process.env.EXPO_PUBLIC_CONVEX_URL;
@@ -14,6 +21,23 @@ const convexUrl = process.env.EXPO_PUBLIC_CONVEX_URL;
 const convex = convexUrl ? new ConvexReactClient(convexUrl, {
   unsavedChangesWarning: false,
 }) : null;
+
+// Apple's San Francisco font is licensed for Apple platforms only, so it
+// can't be bundled into an Android-capable app. Inter is the standard free,
+// openly-licensed (SIL OFL) lookalike most apps use for this exact case —
+// geometrically very close to SF Pro. Applied globally via defaultProps
+// since rewriting fontFamily into every individual style in the app isn't
+// practical; RN still honors fontWeight on top of this for bold/semibold text.
+function applyGlobalFont() {
+  // @ts-expect-error — defaultProps exists at runtime even though newer RN types omit it
+  Text.defaultProps = Text.defaultProps || {};
+  // @ts-expect-error
+  Text.defaultProps.style = [{ fontFamily: "Inter_400Regular" }, Text.defaultProps.style];
+  // @ts-expect-error
+  TextInput.defaultProps = TextInput.defaultProps || {};
+  // @ts-expect-error
+  TextInput.defaultProps.style = [{ fontFamily: "Inter_400Regular" }, TextInput.defaultProps.style];
+}
 
 function MissingEnvScreen() {
   return (
@@ -34,12 +58,27 @@ function MissingEnvScreen() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
   useEffect(() => {
     configureNotifications();
   }, []);
 
+  useEffect(() => {
+    if (fontsLoaded) applyGlobalFont();
+  }, [fontsLoaded]);
+
   if (!convex) {
     return <MissingEnvScreen />;
+  }
+
+  if (!fontsLoaded) {
+    return <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#0f172a" }} />;
   }
 
   return (
@@ -50,10 +89,6 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="notes/index" options={{ presentation: "modal" }} />
             <Stack.Screen name="notes/[id]" options={{ presentation: "modal" }} />
-            <Stack.Screen
-              name="profile"
-              options={{ presentation: "transparentModal", animation: "slide_from_bottom" }}
-            />
           </Stack>
         </ThemeProvider>
       </ConvexProvider>

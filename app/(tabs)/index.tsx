@@ -1,6 +1,8 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import AddTodoModal from "@/components/AddTodoModal";
+import ProfileContent from "@/components/ProfileContent";
+import ProfileDrawer from "@/components/ProfileDrawer";
 import ReminderEditor from "@/components/ReminderEditor";
 import SwipeableRow from "@/components/SwipeableRow";
 import SwipeTabScreen from "@/components/SwipeTabScreen";
@@ -51,6 +53,7 @@ export default function Index() {
   const { colors } = useTheme();
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Id<"todos"> | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<Id<"todos"> | null>(null);
@@ -137,7 +140,12 @@ export default function Index() {
     <SwipeTabScreen path="/">
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Todos</Text>
+          <View style={styles.headerLeft}>
+            <TouchableOpacity onPress={() => setDrawerOpen(true)} style={{ marginRight: 12 }}>
+              <Ionicons name="menu" size={26} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={styles.title}>Todos</Text>
+          </View>
           <TouchableOpacity onPress={() => router.push("/notes")}>
             <Ionicons name="document-text-outline" size={24} color={colors.text} />
           </TouchableOpacity>
@@ -291,6 +299,10 @@ export default function Index() {
         onSave={handleSaveEdit}
         onClose={() => setEditTarget(null)}
       />
+
+      <ProfileDrawer visible={drawerOpen} colors={colors} onClose={() => setDrawerOpen(false)}>
+        <ProfileContent />
+      </ProfileDrawer>
     </SwipeTabScreen>
   );
 }
@@ -308,6 +320,10 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       justifyContent: "space-between",
       alignItems: "center",
       marginBottom: 16,
+    },
+    headerLeft: {
+      flexDirection: "row",
+      alignItems: "center",
     },
     title: {
       fontSize: 28,

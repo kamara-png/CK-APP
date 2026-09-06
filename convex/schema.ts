@@ -6,6 +6,7 @@ export default defineSchema({
     todos:defineTable({
         text:v.string(),
         iscompleted:v.boolean(),
+        completedAt: v.optional(v.number()),
         reminderAt: v.optional(v.number()),
         reminderSound: v.optional(v.union(v.literal("default"), v.literal("silent"))),
 }),

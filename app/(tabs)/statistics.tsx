@@ -4,13 +4,22 @@ import SwipeTabScreen from "@/components/SwipeTabScreen";
 import WeeklyActivityChart from "@/components/WeeklyActivityChart";
 import useTheme from "@/hooks/useTheme";
 import { useSlowLoadingHint } from "@/hooks/useSlowLoadingHint";
+import { computeStreakStats } from "@/lib/streaks";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+
+function formatDuration(ms: number) {
+  const hours = ms / (1000 * 60 * 60);
+  if (hours < 1) return `${Math.round(ms / (1000 * 60))}m`;
+  if (hours < 48) return `${Math.round(hours)}h`;
+  return `${Math.round(hours / 24)}d`;
+}
 
 const StatisticsScreen = () => {
   const { colors } = useTheme();
   const todos = useQuery(api.todos.getTodos);
+  const habitsOverview = useQuery(api.habits.getHabitsOverview);
   const styles = createStyles(colors);
   const slowLoading = useSlowLoadingHint(todos === undefined);
 
@@ -36,20 +45,59 @@ const StatisticsScreen = () => {
   const rate = total === 0 ? 0 : Math.round((completed / total) * 100);
   const maxBar = Math.max(completed, remaining, 1);
 
+  const now = Date.now();
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const completedToday = todos.filter(
+    (t) => t.completedAt && t.completedAt >= startOfToday.getTime()
+  ).length;
+  const upcomingReminders = todos.filter((t) => t.reminderAt && t.reminderAt > now).length;
+
+  const completionTimes = todos
+    .filter((t) => t.completedAt)
+    .map((t) => t.completedAt! - t._creationTime);
+  const avgCompletionMs =
+    completionTimes.length > 0
+      ? completionTimes.reduce((a, b) => a + b, 0) / completionTimes.length
+      : null;
+
   const cards = [
     { label: "Total", value: total, icon: "list-outline", color: colors.primary },
     { label: "Completed", value: completed, icon: "checkmark-circle-outline", color: colors.success },
     { label: "Remaining", value: remaining, icon: "time-outline", color: colors.warning },
   ] as const;
 
+  const productivityCards = [
+    { label: "Done today", value: String(completedToday), icon: "today-outline", color: colors.success },
+    {
+      label: "Avg. to finish",
+      value: avgCompletionMs !== null ? formatDuration(avgCompletionMs) : "—",
+      icon: "hourglass-outline",
+      color: colors.primary,
+    },
+    {
+      label: "Reminders set",
+      value: String(upcomingReminders),
+      icon: "alarm-outline",
+      color: colors.warning,
+    },
+  ] as const;
+
+  const habitsWithStats = (habitsOverview ?? []).map((h) => ({
+    ...h,
+    stats: computeStreakStats(h.dateKeys),
+  }));
+  const bestStreak = habitsWithStats.reduce((max, h) => Math.max(max, h.stats.current), 0);
+  const totalCheckins = habitsWithStats.reduce((sum, h) => sum + h.dateKeys.length, 0);
+
   return (
     <SwipeTabScreen path="/statistics">
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
       <Text style={styles.title}>Statistics</Text>
 
       {total === 0 ? (
         <Text style={styles.empty}>
-          Add some todos on the Streaks tab to see stats here.
+          Add some todos on the Todos tab to see stats here.
         </Text>
       ) : (
         <>
@@ -70,6 +118,19 @@ const StatisticsScreen = () => {
                 <Text style={styles.cardLabel}>{card.label}</Text>
               </View>
             ))}
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Productivity</Text>
+            <View style={styles.cardsRow}>
+              {productivityCards.map((card) => (
+                <View key={card.label} style={styles.miniCard}>
+                  <Ionicons name={card.icon} size={18} color={card.color} />
+                  <Text style={styles.miniCardValue}>{card.value}</Text>
+                  <Text style={styles.cardLabel}>{card.label}</Text>
+                </View>
+              ))}
+            </View>
           </View>
 
           <View style={styles.section}>
@@ -118,9 +179,32 @@ const StatisticsScreen = () => {
               mutedColor={colors.textMuted}
             />
           </View>
+
+          {habitsWithStats.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Streaks overview</Text>
+              <View style={styles.cardsRow}>
+                <View style={styles.miniCard}>
+                  <Ionicons name="flame-outline" size={18} color={colors.danger} />
+                  <Text style={styles.miniCardValue}>{habitsWithStats.length}</Text>
+                  <Text style={styles.cardLabel}>Active streaks</Text>
+                </View>
+                <View style={styles.miniCard}>
+                  <Ionicons name="trophy-outline" size={18} color={colors.warning} />
+                  <Text style={styles.miniCardValue}>{bestStreak}</Text>
+                  <Text style={styles.cardLabel}>Best streak</Text>
+                </View>
+                <View style={styles.miniCard}>
+                  <Ionicons name="checkmark-done-outline" size={18} color={colors.success} />
+                  <Text style={styles.miniCardValue}>{totalCheckins}</Text>
+                  <Text style={styles.cardLabel}>Check-ins</Text>
+                </View>
+              </View>
+            </View>
+          )}
         </>
       )}
-    </View>
+    </ScrollView>
     </SwipeTabScreen>
   );
 };
@@ -174,14 +258,25 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       borderWidth: 1,
       borderColor: colors.border,
     },
+    miniCard: {
+      flex: 1,
+      alignItems: "center",
+      gap: 4,
+    },
     cardValue: {
       fontSize: 22,
       fontWeight: "700",
       color: colors.text,
     },
+    miniCardValue: {
+      fontSize: 17,
+      fontWeight: "700",
+      color: colors.text,
+    },
     cardLabel: {
-      fontSize: 12,
+      fontSize: 11,
       color: colors.textMuted,
+      textAlign: "center",
     },
     section: {
       backgroundColor: colors.surface,
