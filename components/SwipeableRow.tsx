@@ -9,6 +9,10 @@ interface SwipeableRowProps {
   onSwipeDelete?: () => void;
   completeColor: string;
   deleteColor: string;
+  leftLabel?: string;
+  rightLabel?: string;
+  leftIcon?: keyof typeof Ionicons.glyphMap;
+  rightIcon?: keyof typeof Ionicons.glyphMap;
   style?: object;
 }
 
@@ -18,6 +22,10 @@ export default function SwipeableRow({
   onSwipeDelete,
   completeColor,
   deleteColor,
+  leftLabel = "Complete",
+  rightLabel = "Delete",
+  leftIcon = "checkmark-circle",
+  rightIcon = "trash",
   style,
 }: SwipeableRowProps) {
   const swipeableRef = useRef<Swipeable>(null);
@@ -32,9 +40,9 @@ export default function SwipeableRow({
     return (
       <View style={[styles.actionContainer, { backgroundColor: completeColor }]}>
         <Animated.View style={{ transform: [{ scale }] }}>
-          <Ionicons name="checkmark-circle" size={26} color="#fff" />
+          <Ionicons name={leftIcon} size={26} color="#fff" />
         </Animated.View>
-        <Text style={styles.actionLabel}>Complete</Text>
+        <Text style={styles.actionLabel}>{leftLabel}</Text>
       </View>
     );
   };
@@ -49,9 +57,9 @@ export default function SwipeableRow({
     return (
       <View style={[styles.actionContainer, { backgroundColor: deleteColor, alignItems: "flex-end" }]}>
         <Animated.View style={{ transform: [{ scale }] }}>
-          <Ionicons name="trash" size={24} color="#fff" />
+          <Ionicons name={rightIcon} size={24} color="#fff" />
         </Animated.View>
-        <Text style={styles.actionLabel}>Delete</Text>
+        <Text style={styles.actionLabel}>{rightLabel}</Text>
       </View>
     );
   };

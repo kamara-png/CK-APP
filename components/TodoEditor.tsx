@@ -100,6 +100,7 @@ export default function TodoEditor({
                 borderColor={colors.border}
               />
               <Text style={styles.label}>Sound</Text>
+              <Text style={styles.helper}>Choose a sound for this reminder.</Text>
               <View style={styles.soundRow}>
                 {SOUND_OPTIONS.map((option) => {
                   const active = option.value === sound;
@@ -192,16 +193,25 @@ const createStyles = (colors: ColorScheme) =>
     },
     soundRow: {
       flexDirection: "row",
-      gap: 10,
+      flexWrap: "wrap",
+      gap: 8,
     },
     soundOption: {
       flexDirection: "row",
       alignItems: "center",
+      flexBasis: "48%",
+      flexGrow: 1,
       gap: 6,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
       borderRadius: 10,
       borderWidth: 1.5,
+    },
+    helper: {
+      fontSize: 12,
+      color: colors.textMuted,
+      marginTop: -4,
+      marginBottom: 10,
     },
     saveButton: {
       marginTop: 20,

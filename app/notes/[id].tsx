@@ -92,6 +92,11 @@ export default function NoteEditorScreen() {
     router.back();
   };
 
+  const handleSaveAndClose = async () => {
+    await saveLatestNote();
+    router.back();
+  };
+
   const applyFormat = (action: FormatAction) => {
     const { start, end } = selection;
     const before = content.slice(0, start);
@@ -211,10 +216,18 @@ export default function NoteEditorScreen() {
           <TouchableOpacity onPress={handleBack} style={{ padding: 4 }}>
             <Ionicons name="chevron-back" size={26} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.savedLabel}>{savedState === "saving" ? "Saving…" : "Saved"}</Text>
-          <TouchableOpacity onPress={handleDelete} style={{ padding: 4 }}>
-            <Ionicons name="trash-outline" size={20} color={colors.danger} />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <Text style={styles.savedLabel}>{savedState === "saving" ? "Saving…" : "Saved"}</Text>
+            <TouchableOpacity
+              onPress={handleSaveAndClose}
+              style={[styles.saveButton, { backgroundColor: colors.primary }]}
+            >
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
+              <Ionicons name="trash-outline" size={20} color={colors.danger} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.toolRow}>
@@ -361,7 +374,12 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      marginBottom: 8,
+      marginBottom: 14,
+    },
+    headerActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
     },
     savedLabel: {
       fontSize: 12,
@@ -371,12 +389,12 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: 8,
+      marginBottom: 12,
     },
     modeSwitch: {
       flexDirection: "row",
       backgroundColor: colors.surface,
-      borderRadius: 8,
+      borderRadius: 10,
       padding: 3,
       gap: 2,
     },
@@ -387,12 +405,12 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     },
     colorRow: {
       flexDirection: "row",
-      gap: 6,
+      gap: 7,
     },
     swatch: {
-      width: 22,
-      height: 22,
-      borderRadius: 11,
+      width: 24,
+      height: 24,
+      borderRadius: 12,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -438,16 +456,31 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       fontSize: 24,
       fontWeight: "700",
       color: colors.text,
-      paddingVertical: 12,
+      paddingVertical: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      marginBottom: 10,
     },
     contentInput: {
       flex: 1,
       fontSize: 16,
       color: colors.text,
       lineHeight: 24,
-      paddingBottom: 40,
+      paddingTop: 6,
+      paddingBottom: 48,
       minHeight: 300,
     },
+    saveButton: {
+      borderRadius: 9,
+      paddingHorizontal: 13,
+      paddingVertical: 7,
+    },
+    saveButtonText: {
+      color: "#fff",
+      fontSize: 13,
+      fontWeight: "700",
+    },
+    deleteButton: { padding: 5 },
     backlinksSection: {
       marginTop: 20,
       paddingTop: 16,

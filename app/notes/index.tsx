@@ -1,4 +1,6 @@
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import SwipeableRow from "@/components/SwipeableRow";
 import useTheme from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
@@ -12,6 +14,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 
 function timeAgo(ms: number) {
@@ -31,6 +34,7 @@ export default function NotesListScreen() {
   const router = useRouter();
   const notes = useQuery(api.notes.getNotes);
   const createNote = useMutation(api.notes.createNote);
+  const deleteNote = useMutation(api.notes.deleteNote);
   const [search, setSearch] = useState("");
   const styles = createStyles(colors);
 
@@ -46,6 +50,17 @@ export default function NotesListScreen() {
   const handleCreate = async () => {
     const id = await createNote({ title: "", content: "" });
     router.push(`/notes/${id}`);
+  };
+
+  const handleDelete = (id: Id<"notes">) => {
+    Alert.alert("Delete note?", "This note will be permanently removed.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => deleteNote({ id }),
+      },
+    ]);
   };
 
   return (
@@ -75,28 +90,42 @@ export default function NotesListScreen() {
         <FlatList
           data={filtered}
           keyExtractor={(item) => item._id}
-          contentContainerStyle={{ paddingBottom: 24 }}
+          contentContainerStyle={styles.list}
           ListEmptyComponent={
             <Text style={styles.empty}>
               {notes.length === 0 ? "No notes yet, tap + to do something for once" : "Hakuna matches."}
             </Text>
           }
           renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.noteCard,
-                item.color ? { borderLeftWidth: 4, borderLeftColor: item.color } : null,
-              ]}
-              onPress={() => router.push(`/notes/${item._id}`)}
+            <SwipeableRow
+              style={styles.noteSwipe}
+              completeColor={colors.primary}
+              deleteColor={colors.danger}
+              leftLabel="Edit"
+              rightLabel="Delete"
+              leftIcon="pencil"
+              onSwipeComplete={() => router.push(`/notes/${item._id}`)}
+              onSwipeDelete={() => handleDelete(item._id)}
             >
-              <Text style={styles.noteTitle} numberOfLines={1}>
-                {item.title.trim() || "Untitled"}
-              </Text>
-              <Text style={styles.noteSnippet} numberOfLines={2}>
-                {item.content.trim() || "No creativity yet"}
-              </Text>
-              <Text style={styles.noteMeta}>{timeAgo(item.updatedAt)}</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.noteCard,
+                  item.color ? { borderLeftWidth: 4, borderLeftColor: item.color } : null,
+                ]}
+                onPress={() => router.push(`/notes/${item._id}`)}
+              >
+                <View style={styles.noteTopRow}>
+                  <Text style={styles.noteTitle} numberOfLines={1}>
+                    {item.title.trim() || "Untitled"}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                </View>
+                <Text style={styles.noteSnippet} numberOfLines={2}>
+                  {item.content.trim() || "Start writing your thought…"}
+                </Text>
+                <Text style={styles.noteMeta}>{timeAgo(item.updatedAt)}</Text>
+              </TouchableOpacity>
+            </SwipeableRow>
           )}
         />
       )}
@@ -137,13 +166,14 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       backgroundColor: colors.backgrounds.input,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 10,
+      borderRadius: 14,
       paddingHorizontal: 12,
-      marginBottom: 16,
+      paddingVertical: 2,
+      marginBottom: 18,
     },
     searchInput: {
       flex: 1,
-      paddingVertical: 10,
+      paddingVertical: 11,
       color: colors.text,
     },
     empty: {
@@ -153,12 +183,13 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     },
     noteCard: {
       backgroundColor: colors.surface,
-      borderRadius: 10,
+      borderRadius: 14,
       borderWidth: 1,
       borderColor: colors.border,
-      padding: 14,
-      marginBottom: 10,
+      padding: 16,
     },
+    noteSwipe: { marginBottom: 10, borderRadius: 14 },
+    noteTopRow: { flexDirection: "row", alignItems: "center", gap: 8 },
     noteTitle: {
       color: colors.text,
       fontSize: 16,
@@ -175,10 +206,11 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       fontSize: 11,
       marginTop: 8,
     },
-     fab: {
+    list: { paddingBottom: 104 },
+    fab: {
       position: "absolute",
-      right: 10,
-      bottom: 100,
+      right: 20,
+      bottom: 28,
       width: 58,
       height: 58,
       borderRadius: 18,

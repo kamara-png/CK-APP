@@ -314,7 +314,7 @@ export default function Index() {
       />
 
       <ProfileDrawer visible={drawerOpen} colors={colors} onClose={() => setDrawerOpen(false)}>
-        <ProfileContent />
+        <ProfileContent onClose={() => setDrawerOpen(false)} />
       </ProfileDrawer>
     </SwipeTabScreen>
   );
