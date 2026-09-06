@@ -1,5 +1,5 @@
 import { useFocusEffect, useRouter } from "expo-router";
-import { ReactNode, useCallback, useEffect } from "react";
+import { ReactNode, useCallback } from "react";
 import { Dimensions } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -45,10 +45,6 @@ export default function SwipeTabScreen({ path, children }: SwipeTabScreenProps) 
       scale.value = withSpring(1, { damping: 20, stiffness: 180, mass: 0.8 });
     }, [currentIndex, opacity, scale, translateX])
   );
-
-  useEffect(() => {
-    lastFocusedIndex = currentIndex;
-  }, [currentIndex]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
