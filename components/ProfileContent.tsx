@@ -1,3 +1,4 @@
+import BackupExport from "@/components/BackupExport";
 import DangerZone from "@/components/DangerZone";
 import Preferences from "@/components/Preferences";
 import ProgressStats from "@/components/ProgressStats";
@@ -57,6 +58,7 @@ export default function ProfileContent() {
 
       <ProgressStats />
       <Preferences />
+      <BackupExport />
       <DangerZone />
     </ScrollView>
   );

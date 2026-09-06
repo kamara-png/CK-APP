@@ -1,6 +1,7 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import HabitEditor from "@/components/HabitEditor";
+import BouncyIcon from "@/components/BouncyIcon";
 import SwipeableRow from "@/components/SwipeableRow";
 import SwipeTabScreen from "@/components/SwipeTabScreen";
 import useTheme from "@/hooks/useTheme";
@@ -108,11 +109,13 @@ export default function StreaksScreen() {
                         },
                       ]}
                     >
-                      <Ionicons
-                        name={checkedInToday ? "flame" : "flame-outline"}
-                        size={22}
-                        color={checkedInToday ? "#fff" : colors.textMuted}
-                      />
+                      <BouncyIcon active={checkedInToday}>
+                        <Ionicons
+                          name={checkedInToday ? "flame" : "flame-outline"}
+                          size={22}
+                          color={checkedInToday ? "#fff" : colors.textMuted}
+                        />
+                      </BouncyIcon>
                     </TouchableOpacity>
                   </View>
 

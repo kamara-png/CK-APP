@@ -20,6 +20,7 @@ const StatisticsScreen = () => {
   const { colors } = useTheme();
   const todos = useQuery(api.todos.getTodos);
   const habitsOverview = useQuery(api.habits.getHabitsOverview);
+  const notes = useQuery(api.notes.getNotes);
   const styles = createStyles(colors);
   const slowLoading = useSlowLoadingHint(todos === undefined);
 
@@ -89,6 +90,14 @@ const StatisticsScreen = () => {
   }));
   const bestStreak = habitsWithStats.reduce((max, h) => Math.max(max, h.stats.current), 0);
   const totalCheckins = habitsWithStats.reduce((sum, h) => sum + h.dateKeys.length, 0);
+
+  const notesList = notes ?? [];
+  const totalWords = notesList.reduce(
+    (sum, n) => sum + (n.content.trim() ? n.content.trim().split(/\s+/).length : 0),
+    0
+  );
+  const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+  const notesThisWeek = notesList.filter((n) => n.updatedAt >= weekAgo).length;
 
   return (
     <SwipeTabScreen path="/statistics">
@@ -198,6 +207,29 @@ const StatisticsScreen = () => {
                   <Ionicons name="checkmark-done-outline" size={18} color={colors.success} />
                   <Text style={styles.miniCardValue}>{totalCheckins}</Text>
                   <Text style={styles.cardLabel}>Check-ins</Text>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {notesList.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Notes overview</Text>
+              <View style={styles.cardsRow}>
+                <View style={styles.miniCard}>
+                  <Ionicons name="document-text-outline" size={18} color={colors.primary} />
+                  <Text style={styles.miniCardValue}>{notesList.length}</Text>
+                  <Text style={styles.cardLabel}>Total notes</Text>
+                </View>
+                <View style={styles.miniCard}>
+                  <Ionicons name="create-outline" size={18} color={colors.success} />
+                  <Text style={styles.miniCardValue}>{totalWords}</Text>
+                  <Text style={styles.cardLabel}>Words written</Text>
+                </View>
+                <View style={styles.miniCard}>
+                  <Ionicons name="time-outline" size={18} color={colors.warning} />
+                  <Text style={styles.miniCardValue}>{notesThisWeek}</Text>
+                  <Text style={styles.cardLabel}>Edited this week</Text>
                 </View>
               </View>
             </View>

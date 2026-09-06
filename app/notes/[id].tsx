@@ -1,5 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import ColorPicker from "@/components/ColorPicker";
 import FormattingToolbar, { FormatAction } from "@/components/FormattingToolbar";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import useTheme from "@/hooks/useTheme";
@@ -11,6 +12,7 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -45,6 +47,7 @@ export default function NoteEditorScreen() {
   const [mode, setMode] = useState<"write" | "preview">("write");
   const [savedState, setSavedState] = useState<"saved" | "saving">("saved");
   const [selection, setSelection] = useState({ start: 0, end: 0 });
+  const [customPickerOpen, setCustomPickerOpen] = useState(false);
   const loadedRef = useRef(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -233,6 +236,22 @@ export default function NoteEditorScreen() {
                 {!c && <Ionicons name="close" size={12} color={colors.textMuted} />}
               </TouchableOpacity>
             ))}
+            <TouchableOpacity
+              onPress={() => setCustomPickerOpen(true)}
+              style={[
+                styles.swatch,
+                styles.customSwatch,
+                {
+                  borderColor:
+                    color && !NOTE_COLORS.includes(color) ? colors.text : colors.border,
+                  borderWidth: color && !NOTE_COLORS.includes(color) ? 2 : 1,
+                  backgroundColor:
+                    color && !NOTE_COLORS.includes(color) ? color : "transparent",
+                },
+              ]}
+            >
+              <Ionicons name="color-palette-outline" size={14} color={colors.textMuted} />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -284,6 +303,30 @@ export default function NoteEditorScreen() {
           )}
         </ScrollView>
       </View>
+
+      <Modal visible={customPickerOpen} transparent animationType="fade" onRequestClose={() => setCustomPickerOpen(false)}>
+        <View style={styles.pickerBackdrop}>
+          <View style={styles.pickerCard}>
+            <View style={styles.pickerHeader}>
+              <Text style={styles.pickerTitle}>Pick a color</Text>
+              <TouchableOpacity onPress={() => setCustomPickerOpen(false)}>
+                <Ionicons name="close" size={22} color={colors.textMuted} />
+              </TouchableOpacity>
+            </View>
+            <ColorPicker
+              value={color ?? colors.primary}
+              onChange={(hex) => setColor(hex)}
+              colors={colors}
+            />
+            <TouchableOpacity
+              style={[styles.doneButton, { backgroundColor: colors.primary }]}
+              onPress={() => setCustomPickerOpen(false)}
+            >
+              <Text style={styles.doneButtonText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -334,6 +377,44 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       borderRadius: 11,
       alignItems: "center",
       justifyContent: "center",
+    },
+    customSwatch: {
+      borderStyle: "dashed",
+    },
+    pickerBackdrop: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      justifyContent: "center",
+      padding: 24,
+    },
+    pickerCard: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      padding: 20,
+      alignItems: "center",
+    },
+    pickerHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 16,
+      width: "100%",
+    },
+    pickerTitle: {
+      fontSize: 17,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    doneButton: {
+      marginTop: 16,
+      borderRadius: 10,
+      paddingVertical: 12,
+      paddingHorizontal: 40,
+      alignItems: "center",
+    },
+    doneButtonText: {
+      color: "#fff",
+      fontWeight: "700",
     },
     titleInput: {
       fontSize: 24,

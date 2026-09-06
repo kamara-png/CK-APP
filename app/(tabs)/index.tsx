@@ -1,6 +1,7 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import AddTodoModal from "@/components/AddTodoModal";
+import BouncyIcon from "@/components/BouncyIcon";
 import ProfileContent from "@/components/ProfileContent";
 import ProfileDrawer from "@/components/ProfileDrawer";
 import ReminderEditor from "@/components/ReminderEditor";
@@ -205,18 +206,20 @@ export default function Index() {
                         style={styles.rowLeft}
                         onPress={() => toggleTodo({ id: item._id as Id<"todos"> })}
                       >
-                        <View
-                          style={[
-                            styles.checkbox,
-                            item.iscompleted
-                              ? { backgroundColor: colors.success, borderColor: colors.success }
-                              : { borderColor: colors.textMuted },
-                          ]}
-                        >
-                          {item.iscompleted && (
-                            <Ionicons name="checkmark" size={20} color="#fff" />
-                          )}
-                        </View>
+                        <BouncyIcon active={item.iscompleted}>
+                          <View
+                            style={[
+                              styles.checkbox,
+                              item.iscompleted
+                                ? { backgroundColor: colors.success, borderColor: colors.success }
+                                : { borderColor: colors.textMuted },
+                            ]}
+                          >
+                            {item.iscompleted && (
+                              <Ionicons name="checkmark" size={20} color="#fff" />
+                            )}
+                          </View>
+                        </BouncyIcon>
                         <View style={{ flex: 1 }}>
                           <Text
                             style={[styles.rowText, item.iscompleted && styles.rowTextDone]}
