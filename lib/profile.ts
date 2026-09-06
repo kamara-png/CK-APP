@@ -20,7 +20,7 @@ export async function saveProfileName(name: string) {
 /**
  * Opens the device photo library, and if a photo is picked, copies it into
  * this app's own document directory so it persists reliably across app
- * restarts (rather than relying on the picker's own temp/cache location).
+ * restarts.
  * Returns the new persistent URI, or null if the user cancelled or denied
  * permission.
  */

@@ -21,7 +21,7 @@ interface ProgressRingProps {
 
 const ProgressRing = ({
   percent,
-  size = 140,
+  size = 200,
   strokeWidth = 14,
   color,
   trackColor,

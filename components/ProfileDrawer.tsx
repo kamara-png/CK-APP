@@ -1,12 +1,12 @@
+import { ColorScheme } from "@/hooks/useTheme";
 import { useEffect } from "react";
 import { Dimensions, Pressable, StyleSheet, View } from "react-native";
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  Easing,
 } from "react-native-reanimated";
-import { ColorScheme } from "@/hooks/useTheme";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const DRAWER_WIDTH = Math.min(320, SCREEN_WIDTH * 0.82);

@@ -1,7 +1,7 @@
-import { api } from "@/convex/_generated/api";
 import { createSettingsStyles } from "@/assets/styles/settings.styles";
-import useTheme from "@/hooks/useTheme";
+import { api } from "@/convex/_generated/api";
 import { useSlowLoadingHint } from "@/hooks/useSlowLoadingHint";
+import useTheme from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import { ActivityIndicator, Text, View } from "react-native";
