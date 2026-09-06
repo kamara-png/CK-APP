@@ -104,14 +104,14 @@ export default function StreaksScreen() {
                         styles.checkInButton,
                         {
                           backgroundColor: checkedInToday ? item.habit.color : "transparent",
-                          borderColor: item.habit.color,
+                          borderColor: checkedInToday ? item.habit.color : colors.border,
                         },
                       ]}
                     >
                       <Ionicons
-                        name={checkedInToday ? "checkmark" : "ellipse-outline"}
+                        name={checkedInToday ? "flame" : "flame-outline"}
                         size={22}
-                        color={checkedInToday ? "#fff" : item.habit.color}
+                        color={checkedInToday ? "#fff" : colors.textMuted}
                       />
                     </TouchableOpacity>
                   </View>

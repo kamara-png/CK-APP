@@ -1,10 +1,9 @@
 import useTheme from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs, useRouter } from "expo-router";
+import { Tabs } from "expo-router";
 
 const TabsLayout = () => {
   const { colors } = useTheme();
-  const router = useRouter();
 
   return (
     <Tabs
@@ -51,23 +50,6 @@ const TabsLayout = () => {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="bar-chart-outline" size={size} color={color} />
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-circle-outline" size={size} color={color} />
-          ),
-        }}
-        listeners={{
-          tabPress: (e) => {
-            // This tab opens the profile as a partial-height overlay
-            // instead of switching to a full tab screen.
-            e.preventDefault();
-            router.push("/profile");
-          },
         }}
       />
     </Tabs>

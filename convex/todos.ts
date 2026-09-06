@@ -49,8 +49,10 @@ export const addTodo = mutation({
             const todo = await ctx.db.get(args.id)
             if(!todo) throw new ConvexError("Todo not found")
 
+            const nowCompleted = !todo.iscompleted
             await ctx.db.patch(args.id,{
-                iscompleted: !todo.iscompleted
+                iscompleted: nowCompleted,
+                completedAt: nowCompleted ? Date.now() : undefined,
             })
         }
     })
