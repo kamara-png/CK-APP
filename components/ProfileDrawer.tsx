@@ -65,7 +65,10 @@ export default function ProfileDrawer({ visible, colors, onClose, children }: Pr
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents={visible ? "auto" : "box-none"}>
-      <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]}>
+      <Animated.View
+        pointerEvents={visible ? "auto" : "none"}
+        style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]}
+      >
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
       </Animated.View>
       <GestureDetector gesture={drawerPan}>
