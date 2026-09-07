@@ -116,3 +116,20 @@ export const getBacklinks = query({
             .map((n) => ({ _id: n._id, title: n.title }));
     },
 });
+
+export const clearAllNotes = mutation({
+    args: {},
+    handler: async (ctx) => {
+        const userId = await requireUserId(ctx);
+        const notes = await ctx.db
+            .query("notes")
+            .withIndex("by_user_updatedAt", (q) => q.eq("userId", userId))
+            .collect();
+
+        for (const note of notes) {
+            await ctx.db.delete(note._id);
+        }
+
+        return { deletedCount: notes.length };
+    },
+});

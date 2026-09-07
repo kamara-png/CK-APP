@@ -109,3 +109,27 @@ export const toggleCheckin = mutation({
         return { checkedIn: true };
     },
 });
+
+export const clearAllHabits = mutation({
+    args: {},
+    handler: async (ctx) => {
+        const userId = await requireUserId(ctx);
+        const habits = await ctx.db
+            .query("habits")
+            .withIndex("by_user", (q) => q.eq("userId", userId))
+            .collect();
+
+        for (const habit of habits) {
+            const checkins = await ctx.db
+                .query("habitCheckins")
+                .withIndex("by_habit", (q) => q.eq("habitId", habit._id))
+                .collect();
+            for (const checkin of checkins) {
+                await ctx.db.delete(checkin._id);
+            }
+            await ctx.db.delete(habit._id);
+        }
+
+        return { deletedCount: habits.length };
+    },
+});

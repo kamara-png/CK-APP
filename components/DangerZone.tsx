@@ -9,32 +9,71 @@ const DangerZone = () => {
   const { colors } = useTheme();
   const settingsStyles = createSettingsStyles(colors);
   const clearAllTodos = useMutation(api.todos.clearAllTodos);
+  const clearAllNotes = useMutation(api.notes.clearAllNotes);
+  const clearAllHabits = useMutation(api.habits.clearAllHabits);
 
-  const handleClearAll = () => {
-    Alert.alert(
+  const confirmClear = (
+    label: string,
+    message: string,
+    onConfirm: () => void
+  ) => {
+    Alert.alert(label, message, [
+      { text: "Cancel", style: "cancel" },
+      { text: "Clear All", style: "destructive", onPress: onConfirm },
+    ]);
+  };
+
+  const handleClearTodos = () =>
+    confirmClear(
       "Clear all todos?",
       "This will permanently delete every todo. This can't be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Clear All",
-          style: "destructive",
-          onPress: () => clearAllTodos(),
-        },
-      ]
+      () => clearAllTodos()
     );
-  };
+
+  const handleClearNotes = () =>
+    confirmClear(
+      "Clear all notes?",
+      "This will permanently delete every note. This can't be undone.",
+      () => clearAllNotes()
+    );
+
+  const handleClearHabits = () =>
+    confirmClear(
+      "Clear all streaks?",
+      "This will permanently delete every habit and its check-in history. This can't be undone.",
+      () => clearAllHabits()
+    );
 
   return (
     <View style={[settingsStyles.section, { backgroundColor: colors.surface }]}>
       <Text style={settingsStyles.sectionTitleDanger}>Danger Zone</Text>
 
-      <TouchableOpacity style={settingsStyles.actionButton} onPress={handleClearAll}>
+      <TouchableOpacity style={settingsStyles.actionButton} onPress={handleClearTodos}>
         <View style={settingsStyles.actionLeft}>
           <View style={[settingsStyles.actionIcon, { backgroundColor: colors.danger + "20" }]}>
-            <Ionicons name="trash" size={18} color={colors.danger} />
+            <Ionicons name="checkbox" size={18} color={colors.danger} />
           </View>
           <Text style={settingsStyles.actionTextDanger}>Clear All Todos</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={settingsStyles.actionButton} onPress={handleClearNotes}>
+        <View style={settingsStyles.actionLeft}>
+          <View style={[settingsStyles.actionIcon, { backgroundColor: colors.danger + "20" }]}>
+            <Ionicons name="document-text" size={18} color={colors.danger} />
+          </View>
+          <Text style={settingsStyles.actionTextDanger}>Clear All Notes</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={settingsStyles.actionButton} onPress={handleClearHabits}>
+        <View style={settingsStyles.actionLeft}>
+          <View style={[settingsStyles.actionIcon, { backgroundColor: colors.danger + "20" }]}>
+            <Ionicons name="flame" size={18} color={colors.danger} />
+          </View>
+          <Text style={settingsStyles.actionTextDanger}>Clear All Streaks</Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </TouchableOpacity>
