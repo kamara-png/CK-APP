@@ -22,7 +22,7 @@ const BackupExport = () => {
     try {
       await exportAllData(todos, notes, habits);
     } catch {
-      Alert.alert("Export failed", "Something went wrong creating the backup file.");
+      Alert.alert("Export failed", "Something went wrong creating the backup file brev.");
     } finally {
       setExporting(false);
     }
@@ -41,7 +41,7 @@ const BackupExport = () => {
             <Ionicons name="download" size={18} color={colors.primary} />
           </View>
           <Text style={{ color: colors.text, fontWeight: "600" }}>
-            {exporting ? "Preparing…" : "Export all data"}
+            {exporting ? "Preparing your stuff…" : "Export all data"}
           </Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />

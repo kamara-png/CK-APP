@@ -1,6 +1,6 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { ColorScheme } from "@/hooks/useTheme";
+import { Ionicons } from "@expo/vector-icons";
+import { ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
 
 export type FormatAction = "bold" | "italic" | "heading" | "checklist" | "bullet" | "link" | "code";
 
@@ -10,11 +10,11 @@ interface FormattingToolbarProps {
 }
 
 const ICON_BUTTONS: { action: FormatAction; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { action: "heading", icon: "text-outline" },
-  { action: "checklist", icon: "checkbox-outline" },
-  { action: "bullet", icon: "list-outline" },
-  { action: "link", icon: "link-outline" },
-  { action: "code", icon: "code-slash-outline" },
+  { action: "heading", icon: "text" },
+  { action: "checklist", icon: "checkbox" },
+  { action: "bullet", icon: "list" },
+  { action: "link", icon: "link" },
+  { action: "code", icon: "code-slash" },
 ];
 
 export default function FormattingToolbar({ colors, onFormat }: FormattingToolbarProps) {

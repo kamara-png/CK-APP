@@ -26,21 +26,21 @@ const DangerZone = () => {
   const handleClearTodos = () =>
     confirmClear(
       "Clear all todos?",
-      "This will permanently delete every todo. This can't be undone.",
+      "This will permanently delete every todo. This can't be undone by the way.",
       () => clearAllTodos()
     );
 
   const handleClearNotes = () =>
     confirmClear(
       "Clear all notes?",
-      "This will permanently delete every note. This can't be undone.",
+      "This will permanently delete every note. This can't be undone by the way.",
       () => clearAllNotes()
     );
 
   const handleClearHabits = () =>
     confirmClear(
       "Clear all streaks?",
-      "This will permanently delete every habit and its check-in history. This can't be undone.",
+      "This will permanently delete every habit and its check-in history. This can't be undone by the way.",
       () => clearAllHabits()
     );
 

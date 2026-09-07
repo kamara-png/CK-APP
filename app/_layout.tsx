@@ -25,12 +25,7 @@ const convex = convexUrl ? new ConvexReactClient(convexUrl, {
   unsavedChangesWarning: false,
 }) : null;
 
-// Apple's San Francisco font is licensed for Apple platforms only, so it
-// can't be bundled into an Android-capable app. Inter is the standard free,
-// openly-licensed (SIL OFL) lookalike most apps use for this exact case —
-// geometrically very close to SF Pro. Applied globally via defaultProps
-// since rewriting fontFamily into every individual style in the app isn't
-// practical; RN still honors fontWeight on top of this for bold/semibold text.
+
 function applyGlobalFont() {
   // @ts-expect-error — defaultProps exists at runtime even though newer RN types omit it
   Text.defaultProps = Text.defaultProps || {};

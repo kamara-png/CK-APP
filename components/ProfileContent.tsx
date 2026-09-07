@@ -57,7 +57,7 @@ export default function ProfileContent({ onClose }: ProfileContentProps) {
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
       <View style={styles.drawerHeader}>
         <View>
-          <Text style={styles.drawerEyebrow}>YOUR SPACE</Text>
+          <Text style={styles.drawerEyebrow}>PERSONAL SPACE</Text>
           <Text style={styles.drawerTitle}>Profile</Text>
         </View>
         <TouchableOpacity onPress={onClose} style={[styles.closeButton, { backgroundColor: colors.surface }]}>
@@ -88,7 +88,7 @@ export default function ProfileContent({ onClose }: ProfileContentProps) {
           placeholderTextColor={colors.textMuted}
         />
       </View>
-      <Text style={styles.profileHint}>Tap your photo or name to personalise your space.</Text>
+      <Text style={styles.profileHint}>Tap your photo or name to personalise your dedicated space.</Text>
       </View>
 
       <ProgressStats />
