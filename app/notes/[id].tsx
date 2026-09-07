@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
+    InputAccessoryView,
     KeyboardAvoidingView,
     Modal,
     Platform,
@@ -23,7 +24,8 @@ import {
 } from "react-native";
 
 const AUTOSAVE_DELAY_MS = 600;
-const NOTE_COLORS = [null, "#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ec4899"];
+const NOTE_COLORS = [null, "#ef4444", "#f97316", "#f59e0b", "#84cc16", "#10b981", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899"];
+const FORMAT_TOOLBAR_ID = "note-editor-format-toolbar";
 
 export default function NoteEditorScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -48,6 +50,7 @@ export default function NoteEditorScreen() {
   const [savedState, setSavedState] = useState<"saved" | "saving">("saved");
   const [selection, setSelection] = useState({ start: 0, end: 0 });
   const [customPickerOpen, setCustomPickerOpen] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
   const loadedRef = useRef(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestNoteRef = useRef({ title, content, color });
@@ -88,11 +91,6 @@ export default function NoteEditorScreen() {
   }, [title, content, color, saveLatestNote]);
 
   const handleBack = async () => {
-    await saveLatestNote();
-    router.back();
-  };
-
-  const handleSaveAndClose = async () => {
     await saveLatestNote();
     router.back();
   };
@@ -213,24 +211,9 @@ export default function NoteEditorScreen() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={{ padding: 4 }}>
-            <Ionicons name="chevron-back" size={26} color={colors.text} />
+          <TouchableOpacity onPress={handleBack} style={styles.headerIconButton}>
+            <Ionicons name="chevron-back" size={26} color={colors.primary} />
           </TouchableOpacity>
-          <View style={styles.headerActions}>
-            <Text style={styles.savedLabel}>{savedState === "saving" ? "Saving…" : "Saved"}</Text>
-            <TouchableOpacity
-              onPress={handleSaveAndClose}
-              style={[styles.saveButton, { backgroundColor: colors.primary }]}
-            >
-              <Text style={styles.saveButtonText}>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-              <Ionicons name="trash-outline" size={20} color={colors.danger} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.toolRow}>
           <View style={styles.modeSwitch}>
             <TouchableOpacity
               style={[styles.modeButton, mode === "write" && { backgroundColor: colors.primary }]}
@@ -249,44 +232,16 @@ export default function NoteEditorScreen() {
               </Text>
             </TouchableOpacity>
           </View>
-
-          <View style={styles.colorRow}>
-            {NOTE_COLORS.map((c) => (
-              <TouchableOpacity
-                key={c ?? "none"}
-                onPress={() => setColor(c ?? undefined)}
-                style={[
-                  styles.swatch,
-                  {
-                    backgroundColor: c ?? colors.bg,
-                    borderColor: color === c ? colors.text : colors.border,
-                    borderWidth: color === c ? 2 : 1,
-                  },
-                ]}
-              >
-                {!c && <Ionicons name="close" size={12} color={colors.textMuted} />}
-              </TouchableOpacity>
-            ))}
-            <TouchableOpacity
-              onPress={() => setCustomPickerOpen(true)}
-              style={[
-                styles.swatch,
-                styles.customSwatch,
-                {
-                  borderColor:
-                    color && !NOTE_COLORS.includes(color) ? colors.text : colors.border,
-                  borderWidth: color && !NOTE_COLORS.includes(color) ? 2 : 1,
-                  backgroundColor:
-                    color && !NOTE_COLORS.includes(color) ? color : "transparent",
-                },
-              ]}
-            >
-              <Ionicons name="color-palette-outline" size={14} color={colors.textMuted} />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity onPress={() => setOptionsOpen(true)} style={styles.headerIconButton}>
+            <Ionicons name="ellipsis-horizontal-circle-outline" size={24} color={colors.text} />
+          </TouchableOpacity>
         </View>
 
-        {mode === "write" && <FormattingToolbar colors={colors} onFormat={applyFormat} />}
+        {savedState === "saving" && <Text style={styles.savingHint}>Saving…</Text>}
+
+        {mode === "write" && Platform.OS !== "ios" && (
+          <FormattingToolbar colors={colors} onFormat={applyFormat} />
+        )}
 
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1 }}>
           <TextInput
@@ -307,6 +262,7 @@ export default function NoteEditorScreen() {
               placeholderTextColor={colors.textMuted}
               multiline
               textAlignVertical="top"
+              inputAccessoryViewID={Platform.OS === "ios" ? FORMAT_TOOLBAR_ID : undefined}
             />
           ) : (
             <View style={{ paddingVertical: 8 }}>
@@ -334,6 +290,73 @@ export default function NoteEditorScreen() {
           )}
         </ScrollView>
       </View>
+
+      {Platform.OS === "ios" && mode === "write" && (
+        <InputAccessoryView nativeID={FORMAT_TOOLBAR_ID}>
+          <View style={{ backgroundColor: colors.surface }}>
+            <FormattingToolbar colors={colors} onFormat={applyFormat} />
+          </View>
+        </InputAccessoryView>
+      )}
+
+      <Modal visible={optionsOpen} transparent animationType="slide" onRequestClose={() => setOptionsOpen(false)}>
+        <TouchableOpacity style={styles.pickerBackdrop} activeOpacity={1} onPress={() => setOptionsOpen(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.optionsSheet}>
+            <View style={styles.sheetHandle} />
+            <Text style={styles.pickerTitle}>Note Options</Text>
+
+            <Text style={styles.optionsLabel}>Color</Text>
+            <View style={styles.colorRow}>
+              {NOTE_COLORS.map((c) => (
+                <TouchableOpacity
+                  key={c ?? "none"}
+                  onPress={() => setColor(c ?? undefined)}
+                  style={[
+                    styles.swatch,
+                    {
+                      backgroundColor: c ?? colors.bg,
+                      borderColor: color === c ? colors.text : colors.border,
+                      borderWidth: color === c ? 2 : 1,
+                    },
+                  ]}
+                >
+                  {!c && <Ionicons name="close" size={12} color={colors.textMuted} />}
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity
+                onPress={() => {
+                  setOptionsOpen(false);
+                  setCustomPickerOpen(true);
+                }}
+                style={[
+                  styles.swatch,
+                  styles.customSwatch,
+                  {
+                    borderColor:
+                      color && !NOTE_COLORS.includes(color) ? colors.text : colors.border,
+                    borderWidth: color && !NOTE_COLORS.includes(color) ? 2 : 1,
+                    backgroundColor:
+                      color && !NOTE_COLORS.includes(color) ? color : "transparent",
+                  },
+                ]}
+              >
+                <Ionicons name="color-palette-outline" size={14} color={colors.textMuted} />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={styles.deleteRow}
+              onPress={() => {
+                setOptionsOpen(false);
+                handleDelete();
+              }}
+            >
+              <Ionicons name="trash-outline" size={18} color={colors.danger} />
+              <Text style={styles.deleteRowText}>Delete Note</Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
 
       <Modal visible={customPickerOpen} transparent animationType="fade" onRequestClose={() => setCustomPickerOpen(false)}>
         <View style={styles.pickerBackdrop}>
@@ -378,22 +401,18 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      marginBottom: 14,
+      marginBottom: 6,
     },
-    headerActions: {
-      flexDirection: "row",
+    headerIconButton: {
+      padding: 4,
+      width: 34,
       alignItems: "center",
-      gap: 10,
     },
-    savedLabel: {
-      fontSize: 12,
+    savingHint: {
+      fontSize: 11,
       color: colors.textMuted,
-    },
-    toolRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 12,
+      textAlign: "center",
+      marginBottom: 8,
     },
     modeSwitch: {
       flexDirection: "row",
@@ -409,17 +428,55 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     },
     colorRow: {
       flexDirection: "row",
-      gap: 7,
+      flexWrap: "wrap",
+      gap: 10,
+      marginBottom: 20,
     },
     swatch: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
+      width: 28,
+      height: 28,
+      borderRadius: 14,
       alignItems: "center",
       justifyContent: "center",
     },
     customSwatch: {
       borderStyle: "dashed",
+    },
+    optionsSheet: {
+      backgroundColor: colors.surface,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      padding: 20,
+      paddingBottom: 36,
+    },
+    sheetHandle: {
+      width: 36,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: colors.border,
+      alignSelf: "center",
+      marginBottom: 14,
+    },
+    optionsLabel: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: colors.textMuted,
+      marginTop: 6,
+      marginBottom: 10,
+    },
+    deleteRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      paddingVertical: 14,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      marginTop: 4,
+    },
+    deleteRowText: {
+      color: colors.danger,
+      fontSize: 16,
+      fontWeight: "600",
     },
     pickerBackdrop: {
       flex: 1,
@@ -477,17 +534,11 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       paddingBottom: 48,
       minHeight: 300,
     },
-    saveButton: {
-      borderRadius: 9,
-      paddingHorizontal: 13,
-      paddingVertical: 7,
-    },
     saveButtonText: {
       color: "#fff",
       fontSize: 13,
       fontWeight: "700",
     },
-    deleteButton: { padding: 5 },
     backlinksSection: {
       marginTop: 20,
       paddingTop: 16,

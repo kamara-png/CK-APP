@@ -28,7 +28,9 @@ const AccountSection = () => {
           <View style={[settingsStyles.actionIcon, { backgroundColor: colors.primary + "20" }]}>
             <Ionicons name="mail" size={18} color={colors.primary} />
           </View>
-          <Text style={settingsStyles.actionText}>{user.email}</Text>
+          <Text style={settingsStyles.actionText} numberOfLines={1} ellipsizeMode="tail">
+            {user.email}
+          </Text>
         </View>
       )}
 

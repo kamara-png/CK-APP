@@ -7,8 +7,10 @@ import useTheme from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import PagerView from "react-native-pager-view";
 import Animated, {
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
@@ -19,9 +21,16 @@ const TABS = [
   { key: "statistics", icon: "podium-outline" as const, activeIcon: "podium" as const },
 ];
 
+// How far in from the left edge a swipe has to start to count as "open the
+// drawer" rather than a normal page swipe. Mirrors iOS's own edge-swipe
+// hit zone for back gestures.
+const EDGE_ZONE_WIDTH = 36;
+const OPEN_DRAG_THRESHOLD = 50;
+
 export default function TabsIndex() {
   const { colors } = useTheme();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const pagerRef = useRef<PagerView>(null);
 
   // Continuous 0..(TABS.length - 1) scroll position, updated on every frame
@@ -37,11 +46,34 @@ export default function TabsIndex() {
     [scrollPosition]
   );
 
+  const handlePageSelected = useCallback(
+    (event: { nativeEvent: { position: number } }) => {
+      setActiveIndex(event.nativeEvent.position);
+    },
+    []
+  );
+
   const goToPage = (index: number) => {
     pagerRef.current?.setPage(index);
   };
 
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
+
+  // Profile access lives only on the Todos/home tab (via the hamburger, or
+  // this edge swipe). Todos is always page 0, so there's no "previous page"
+  // for the pager to scroll to from there anyway — the edge is free to
+  // repurpose for revealing the drawer, exactly like Instagram's DMs swipe.
+  const edgeSwipe = Gesture.Pan()
+    .enabled(activeIndex === 0 && !drawerOpen)
+    .activeOffsetX(15)
+    .failOffsetY([-20, 20])
+    .onEnd((event) => {
+      "worklet";
+      if (event.translationX > OPEN_DRAG_THRESHOLD || event.velocityX > 600) {
+        runOnJS(openDrawer)();
+      }
+    });
 
   const styles = createStyles(colors);
 
@@ -52,17 +84,24 @@ export default function TabsIndex() {
         style={styles.flex}
         initialPage={0}
         onPageScroll={handlePageScroll}
+        onPageSelected={handlePageSelected}
       >
         <View key="todos" style={styles.flex}>
           <TodosScreen onMenuPress={openDrawer} />
         </View>
         <View key="streaks" style={styles.flex}>
-          <StreaksScreen onMenuPress={openDrawer} />
+          <StreaksScreen />
         </View>
         <View key="statistics" style={styles.flex}>
-          <StatisticsScreen onMenuPress={openDrawer} />
+          <StatisticsScreen />
         </View>
       </PagerView>
+
+      {activeIndex === 0 && (
+        <GestureDetector gesture={edgeSwipe}>
+          <View style={styles.edgeZone} pointerEvents="box-only" />
+        </GestureDetector>
+      )}
 
       <View style={[styles.tabBar, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
         {TABS.map((tab, index) => (
@@ -79,8 +118,8 @@ export default function TabsIndex() {
         ))}
       </View>
 
-      <ProfileDrawer visible={drawerOpen} colors={colors} onClose={() => setDrawerOpen(false)}>
-        <ProfileContent onClose={() => setDrawerOpen(false)} />
+      <ProfileDrawer visible={drawerOpen} colors={colors} onClose={closeDrawer}>
+        <ProfileContent onClose={closeDrawer} />
       </ProfileDrawer>
     </View>
   );
@@ -154,6 +193,13 @@ const iconStyles = StyleSheet.create({
 const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
   StyleSheet.create({
     flex: { flex: 1, backgroundColor: colors.bg },
+    edgeZone: {
+      position: "absolute",
+      left: 0,
+      top: 0,
+      bottom: 90,
+      width: EDGE_ZONE_WIDTH,
+    },
     tabBar: {
       flexDirection: "row",
       height: 90,

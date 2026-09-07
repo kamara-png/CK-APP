@@ -20,11 +20,7 @@ import {
 
 const DAY_LABELS = ["S", "M", "T", "W", "Th", "F", "Sat"];
 
-interface StreaksScreenProps {
-  onMenuPress: () => void;
-}
-
-export default function StreaksScreen({ onMenuPress }: StreaksScreenProps) {
+export default function StreaksScreen() {
   const { colors } = useTheme();
   const overview = useQuery(api.habits.getHabitsOverview);
   const createHabit = useMutation(api.habits.createHabit);
@@ -51,11 +47,7 @@ export default function StreaksScreen({ onMenuPress }: StreaksScreenProps) {
     <>
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={onMenuPress} style={styles.headerAction}>
-          <Ionicons name="menu" size={30} color={colors.text} />
-        </TouchableOpacity>
         <Text style={styles.title}>Streaks</Text>
-        <View style={styles.headerAction} />
       </View>
 
       {overview === undefined ? (

@@ -10,7 +10,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const DRAWER_WIDTH = Math.min(320, SCREEN_WIDTH * 0.82);
+const DRAWER_WIDTH = Math.min(360, SCREEN_WIDTH * 0.88);
 
 interface ProfileDrawerProps {
   visible: boolean;

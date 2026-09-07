@@ -1,19 +1,27 @@
 import { createSettingsStyles } from "@/assets/styles/settings.styles";
 import useTheme, { ACCENT_OPTIONS, ThemeAccent } from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import { FlatList, Modal, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 
 const accentIcons: Record<ThemeAccent, keyof typeof Ionicons.glyphMap> = {
   default: "color-palette",
   duolingo: "leaf",
   instagram: "camera",
   obsidian: "diamond",
+  substack: "mail",
+  twitter: "at",
+  spotify: "musical-notes",
+  notion: "document-text",
 };
 
 const Preferences = () => {
   const { colors, accent, setAccent, mode, toggleMode } = useTheme();
   const settingsStyles = createSettingsStyles(colors);
   const styles = createLocalStyles(colors);
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  const activeOption = ACCENT_OPTIONS.find((o) => o.name === accent) ?? ACCENT_OPTIONS[0];
 
   return (
     <View style={[settingsStyles.section, { backgroundColor: colors.surface }]}>
@@ -38,84 +46,144 @@ const Preferences = () => {
         />
       </View>
 
-      <Text style={styles.label}>Color theme</Text>
-      <View style={styles.themeGrid}>
-        {ACCENT_OPTIONS.map((option) => {
-          const active = option.name === accent;
-          return (
-            <TouchableOpacity
-              key={option.name}
-              style={[
-                styles.themeOption,
-                {
-                  borderColor: active ? colors.primary : colors.border,
-                  backgroundColor: active ? colors.primary + "15" : colors.bg,
-                },
-              ]}
-              onPress={() => setAccent(option.name)}
-            >
-              <Ionicons
-                name={accentIcons[option.name]}
-                size={20}
-                color={active ? colors.primary : colors.textMuted}
-              />
-              <Text
-                style={[
-                  styles.themeLabel,
-                  { color: active ? colors.primary : colors.text },
-                ]}
-              >
-                {option.label}
-              </Text>
-              {active && (
-                <Ionicons name="checkmark" size={16} color={colors.primary} />
-              )}
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-      <Text style={styles.subnote}>
-        Each theme has its own light and dark look, the switch above changes the
-        appearance of the app to whichever one you pick.
-      </Text>
+      <TouchableOpacity
+        style={[settingsStyles.settingItem, { borderBottomWidth: 0 }]}
+        onPress={() => setPickerOpen(true)}
+      >
+        <View style={settingsStyles.settingLeft}>
+          <View style={[settingsStyles.settingIcon, { backgroundColor: colors.primary + "20" }]}>
+            <Ionicons name={accentIcons[accent]} size={18} color={colors.primary} />
+          </View>
+          <Text style={settingsStyles.settingText}>Color theme</Text>
+        </View>
+        <View style={styles.currentValueRow}>
+          <Text style={styles.currentValueText}>{activeOption.label}</Text>
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+        </View>
+      </TouchableOpacity>
+
+      <Modal
+        visible={pickerOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setPickerOpen(false)}
+      >
+        <TouchableOpacity
+          style={styles.backdrop}
+          activeOpacity={1}
+          onPress={() => setPickerOpen(false)}
+        >
+          <TouchableOpacity activeOpacity={1} style={styles.sheet}>
+            <View style={styles.sheetHandle} />
+            <Text style={styles.sheetTitle}>Color theme</Text>
+            <Text style={styles.sheetSubtitle}>
+              Each theme has its own light and dark look, the Dark Mode switch
+              changes which one is shown.
+            </Text>
+            <FlatList
+              data={ACCENT_OPTIONS}
+              keyExtractor={(item) => item.name}
+              style={{ maxHeight: 360 }}
+              renderItem={({ item }) => {
+                const active = item.name === accent;
+                return (
+                  <TouchableOpacity
+                    style={[styles.row, active && { backgroundColor: colors.primary + "12" }]}
+                    onPress={() => {
+                      setAccent(item.name);
+                      setPickerOpen(false);
+                    }}
+                  >
+                    <View style={[styles.swatchDot, { backgroundColor: active ? colors.primary : colors.bg }]}>
+                      <Ionicons
+                        name={accentIcons[item.name]}
+                        size={16}
+                        color={active ? "#fff" : colors.textMuted}
+                      />
+                    </View>
+                    <Text style={[styles.rowLabel, { color: active ? colors.primary : colors.text }]}>
+                      {item.label}
+                    </Text>
+                    {active && <Ionicons name="checkmark-circle" size={20} color={colors.primary} />}
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
 
 const createLocalStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
   StyleSheet.create({
-    label: {
-      fontSize: 20,
-      fontWeight: "700",
-      color: colors.textMuted,
-      marginTop: 16,
-      marginBottom: 12,
-    },
-    themeGrid: {
-      flexDirection: "column",
-      alignItems: "stretch",
-      gap: 12,
-    },
-    themeOption: {
+    currentValueRow: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 8,
-      paddingHorizontal: 14,
-      paddingVertical: 10,
-      borderRadius: 12,
-      borderWidth: 1.5,
-      minWidth: "45%",
+      gap: 6,
     },
-    themeLabel: {
-      fontSize: 14,
+    currentValueText: {
+      fontSize: 15,
       fontWeight: "600",
-      flex: 1,
+      color: colors.textMuted,
     },
-    subnote: {
-      marginTop: 12,
+    backdrop: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      justifyContent: "flex-end",
+    },
+    sheet: {
+      backgroundColor: colors.surface,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      paddingHorizontal: 20,
+      paddingTop: 10,
+      paddingBottom: 32,
+      maxHeight: "75%",
+    },
+    sheetHandle: {
+      width: 36,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: colors.border,
+      alignSelf: "center",
+      marginBottom: 14,
+    },
+    sheetTitle: {
+      fontSize: 20,
+      fontWeight: "800",
+      color: colors.text,
+      marginBottom: 4,
+    },
+    sheetSubtitle: {
       fontSize: 12,
       color: colors.textMuted,
       lineHeight: 17,
+      marginBottom: 12,
+    },
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 10,
+      borderRadius: 12,
+    },
+    swatchDot: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.bg,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    rowLabel: {
+      flex: 1,
+      fontSize: 15,
+      fontWeight: "600",
     },
   });
 

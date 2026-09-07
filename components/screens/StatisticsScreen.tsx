@@ -6,7 +6,7 @@ import useTheme from "@/hooks/useTheme";
 import { computeStreakStats } from "@/lib/streaks";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 
 function formatDuration(ms: number) {
   const hours = ms / (1000 * 60 * 60);
@@ -15,11 +15,7 @@ function formatDuration(ms: number) {
   return `${Math.round(hours / 24)}d`;
 }
 
-interface StatisticsScreenProps {
-  onMenuPress: () => void;
-}
-
-const StatisticsScreen = ({ onMenuPress }: StatisticsScreenProps) => {
+const StatisticsScreen = () => {
   const { colors } = useTheme();
   const todos = useQuery(api.todos.getTodos);
   const habitsOverview = useQuery(api.habits.getHabitsOverview);
@@ -103,11 +99,7 @@ const StatisticsScreen = ({ onMenuPress }: StatisticsScreenProps) => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={onMenuPress} style={styles.headerAction}>
-          <Ionicons name="menu" size={30} color={colors.text} />
-        </TouchableOpacity>
         <Text style={styles.title}>Statistics</Text>
-        <View style={styles.headerAction} />
       </View>
 
       {total === 0 ? (

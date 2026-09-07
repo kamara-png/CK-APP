@@ -151,11 +151,13 @@ export const createSettingsStyles = (colors: ColorScheme) => {
       fontSize: 17,
       fontWeight: "600",
       color: colors.text,
+      flexShrink: 1,
     },
     actionTextDanger: {
       fontSize: 17,
       fontWeight: "600",
       color: colors.danger,
+      flexShrink: 1,
     },
   });
 

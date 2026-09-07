@@ -38,6 +38,7 @@ export default function SignInScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -119,9 +120,19 @@ export default function SignInScreen() {
             onChangeText={setPassword}
             placeholder="Password (min 8 characters)"
             placeholderTextColor={colors.textMuted}
-            secureTextEntry
+            secureTextEntry={!showPassword}
             autoComplete="password"
           />
+          <TouchableOpacity
+            onPress={() => setShowPassword((v) => !v)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons
+              name={showPassword ? "eye-off-outline" : "eye-outline"}
+              size={18}
+              color={colors.textMuted}
+            />
+          </TouchableOpacity>
         </View>
 
         {error && <Text style={styles.error}>{error}</Text>}

@@ -115,8 +115,14 @@ export default function RootLayout() {
           <AuthGate>
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="notes/index" options={{ presentation: "modal" }} />
-              <Stack.Screen name="notes/[id]" options={{ presentation: "modal" }} />
+              <Stack.Screen
+                name="notes/index"
+                options={{ animation: "slide_from_right", gestureEnabled: true, gestureDirection: "horizontal" }}
+              />
+              <Stack.Screen
+                name="notes/[id]"
+                options={{ animation: "slide_from_right", gestureEnabled: true, gestureDirection: "horizontal" }}
+              />
             </Stack>
           </AuthGate>
         </ThemeProvider>

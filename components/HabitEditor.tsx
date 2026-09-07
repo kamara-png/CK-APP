@@ -3,7 +3,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
-const PRESET_COLORS = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ec4899"];
+const PRESET_COLORS = [
+  "#ef4444", "#f97316", "#f59e0b", "#eab308", "#84cc16",
+  "#10b981", "#14b8a6", "#06b6d4", "#3b82f6", "#6366f1",
+  "#8b5cf6", "#a855f7", "#d946ef", "#ec4899", "#f43f5e",
+];
 
 interface HabitEditorProps {
   visible: boolean;
@@ -119,6 +123,7 @@ const createStyles = (colors: ColorScheme) =>
     },
     colorRow: {
       flexDirection: "row",
+      flexWrap: "wrap",
       gap: 12,
     },
     swatch: {

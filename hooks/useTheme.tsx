@@ -32,7 +32,7 @@ export interface ColorScheme {
   isDark: boolean;
 }
 
-export type ThemeAccent = "default" | "duolingo" | "instagram" | "obsidian";
+export type ThemeAccent = "default" | "duolingo" | "instagram" | "obsidian" | "substack" | "twitter" | "spotify" | "notion";
 export type ThemeMode = "light" | "dark";
 /** @deprecated old combined theme identifier, kept only for migrating existing saved values */
 export type ThemeName = "light" | "dark" | "duolingo" | "instagram";
@@ -42,6 +42,10 @@ export const ACCENT_OPTIONS: { name: ThemeAccent; label: string }[] = [
   { name: "duolingo", label: "Duolingo" },
   { name: "instagram", label: "Instagram" },
   { name: "obsidian", label: "Obsidian" },
+  { name: "substack", label: "Substack" },
+  { name: "twitter", label: "Twitter / X" },
+  { name: "spotify", label: "Spotify" },
+  { name: "notion", label: "Notion" },
 ];
 
 const defaultLight: ColorScheme = {
@@ -256,11 +260,228 @@ const obsidianDark: ColorScheme = {
   isDark: true,
 };
 
+// Substack's signature warm orange on a cream, editorial background.
+const substackLight: ColorScheme = {
+  bg: "#fff9f2",
+  surface: "#ffffff",
+  text: "#242220",
+  textMuted: "#7a746c",
+  border: "#ece5d8",
+  primary: "#ff6719",
+  success: "#3c9e6f",
+  warning: "#e8a72e",
+  danger: "#d64545",
+  shadow: "#000000",
+  gradients: {
+    background: ["#fff9f2", "#fdf1e2"],
+    surface: ["#ffffff", "#fffaf0"],
+    primary: ["#ff8a3d", "#ff6719"],
+    success: ["#5cbf8f", "#3c9e6f"],
+    warning: ["#f0bb52", "#e8a72e"],
+    danger: ["#e06a6a", "#d64545"],
+    muted: ["#ece5d8", "#ddd4c2"],
+    empty: ["#f5f0e6", "#ece5d8"],
+  },
+  backgrounds: { input: "#ffffff", editInput: "#fff9f2" },
+  statusBarStyle: "dark-content",
+  isDark: false,
+};
+
+const substackDark: ColorScheme = {
+  bg: "#1c1a17",
+  surface: "#262320",
+  text: "#f5f0e6",
+  textMuted: "#a89f8f",
+  border: "#3a352e",
+  primary: "#ff8a3d",
+  success: "#5cbf8f",
+  warning: "#e8a72e",
+  danger: "#e06a6a",
+  shadow: "#000000",
+  gradients: {
+    background: ["#1c1a17", "#262320"],
+    surface: ["#262320", "#2e2a25"],
+    primary: ["#ff6719", "#ff8a3d"],
+    success: ["#3c9e6f", "#5cbf8f"],
+    warning: ["#e8a72e", "#f0bb52"],
+    danger: ["#d64545", "#e06a6a"],
+    muted: ["#3a352e", "#48423a"],
+    empty: ["#2e2a25", "#3a352e"],
+  },
+  backgrounds: { input: "#262320", editInput: "#1c1a17" },
+  statusBarStyle: "light-content",
+  isDark: true,
+};
+
+// Twitter/X — crisp blue accent on a clean, near-monochrome ground.
+const twitterLight: ColorScheme = {
+  bg: "#ffffff",
+  surface: "#f7f9f9",
+  text: "#0f1419",
+  textMuted: "#536471",
+  border: "#eff3f4",
+  primary: "#1d9bf0",
+  success: "#00ba7c",
+  warning: "#ffd400",
+  danger: "#f4212e",
+  shadow: "#000000",
+  gradients: {
+    background: ["#ffffff", "#f7f9f9"],
+    surface: ["#f7f9f9", "#eff3f4"],
+    primary: ["#1d9bf0", "#0c7abf"],
+    success: ["#00ba7c", "#009466"],
+    warning: ["#ffd400", "#e6bf00"],
+    danger: ["#f4212e", "#d11525"],
+    muted: ["#eff3f4", "#d6dbdc"],
+    empty: ["#f7f9f9", "#eff3f4"],
+  },
+  backgrounds: { input: "#eff3f4", editInput: "#ffffff" },
+  statusBarStyle: "dark-content",
+  isDark: false,
+};
+
+const twitterDark: ColorScheme = {
+  bg: "#000000",
+  surface: "#16181c",
+  text: "#e7e9ea",
+  textMuted: "#71767b",
+  border: "#2f3336",
+  primary: "#1d9bf0",
+  success: "#00ba7c",
+  warning: "#ffd400",
+  danger: "#f4212e",
+  shadow: "#000000",
+  gradients: {
+    background: ["#000000", "#16181c"],
+    surface: ["#16181c", "#1e2126"],
+    primary: ["#1d9bf0", "#4db5f5"],
+    success: ["#00ba7c", "#33c797"],
+    warning: ["#ffd400", "#ffe066"],
+    danger: ["#f4212e", "#f65661"],
+    muted: ["#2f3336", "#3e4144"],
+    empty: ["#1e2126", "#2f3336"],
+  },
+  backgrounds: { input: "#202327", editInput: "#000000" },
+  statusBarStyle: "light-content",
+  isDark: true,
+};
+
+// Spotify — near-black surfaces punched through with signature spring green.
+const spotifyLight: ColorScheme = {
+  bg: "#f6f6f6",
+  surface: "#ffffff",
+  text: "#191414",
+  textMuted: "#5e5e5e",
+  border: "#e5e5e5",
+  primary: "#1db954",
+  success: "#1db954",
+  warning: "#ffa42b",
+  danger: "#e91429",
+  shadow: "#000000",
+  gradients: {
+    background: ["#f6f6f6", "#ececec"],
+    surface: ["#ffffff", "#f6f6f6"],
+    primary: ["#1ed760", "#1db954"],
+    success: ["#1ed760", "#1db954"],
+    warning: ["#ffb85c", "#ffa42b"],
+    danger: ["#f2394a", "#e91429"],
+    muted: ["#e5e5e5", "#d4d4d4"],
+    empty: ["#efefef", "#e5e5e5"],
+  },
+  backgrounds: { input: "#ffffff", editInput: "#f6f6f6" },
+  statusBarStyle: "dark-content",
+  isDark: false,
+};
+
+const spotifyDark: ColorScheme = {
+  bg: "#121212",
+  surface: "#1e1e1e",
+  text: "#ffffff",
+  textMuted: "#b3b3b3",
+  border: "#2a2a2a",
+  primary: "#1ed760",
+  success: "#1ed760",
+  warning: "#ffa42b",
+  danger: "#f2394a",
+  shadow: "#000000",
+  gradients: {
+    background: ["#121212", "#181818"],
+    surface: ["#181818", "#282828"],
+    primary: ["#1db954", "#1ed760"],
+    success: ["#1db954", "#1ed760"],
+    warning: ["#ffa42b", "#ffb85c"],
+    danger: ["#e91429", "#f2394a"],
+    muted: ["#282828", "#333333"],
+    empty: ["#181818", "#282828"],
+  },
+  backgrounds: { input: "#242424", editInput: "#121212" },
+  statusBarStyle: "light-content",
+  isDark: true,
+};
+
+// Notion — pared-back grayscale with a soft neutral accent, built for
+// distraction-free reading and writing.
+const notionLight: ColorScheme = {
+  bg: "#ffffff",
+  surface: "#f7f6f3",
+  text: "#37352f",
+  textMuted: "#787774",
+  border: "#e9e9e7",
+  primary: "#2f2f2f",
+  success: "#2f9e44",
+  warning: "#d9730d",
+  danger: "#e03e3e",
+  shadow: "#000000",
+  gradients: {
+    background: ["#ffffff", "#f7f6f3"],
+    surface: ["#f7f6f3", "#efeeea"],
+    primary: ["#5a5a5a", "#2f2f2f"],
+    success: ["#4cb15c", "#2f9e44"],
+    warning: ["#e8912e", "#d9730d"],
+    danger: ["#e8635f", "#e03e3e"],
+    muted: ["#e9e9e7", "#dcdbd8"],
+    empty: ["#f2f1ee", "#e9e9e7"],
+  },
+  backgrounds: { input: "#ffffff", editInput: "#f7f6f3" },
+  statusBarStyle: "dark-content",
+  isDark: false,
+};
+
+const notionDark: ColorScheme = {
+  bg: "#191919",
+  surface: "#202020",
+  text: "#e9e9e7",
+  textMuted: "#9b9b9b",
+  border: "#2f2f2f",
+  primary: "#e9e9e7",
+  success: "#4cb15c",
+  warning: "#e8912e",
+  danger: "#e8635f",
+  shadow: "#000000",
+  gradients: {
+    background: ["#191919", "#202020"],
+    surface: ["#202020", "#2a2a2a"],
+    primary: ["#c9c9c7", "#e9e9e7"],
+    success: ["#2f9e44", "#4cb15c"],
+    warning: ["#d9730d", "#e8912e"],
+    danger: ["#e03e3e", "#e8635f"],
+    muted: ["#2f2f2f", "#3a3a3a"],
+    empty: ["#2a2a2a", "#2f2f2f"],
+  },
+  backgrounds: { input: "#252525", editInput: "#191919" },
+  statusBarStyle: "light-content",
+  isDark: true,
+};
+
 const palettes: Record<ThemeAccent, Record<ThemeMode, ColorScheme>> = {
   default: { light: defaultLight, dark: defaultDark },
   duolingo: { light: duolingoLight, dark: duolingoDark },
   instagram: { light: instagramLight, dark: instagramDark },
   obsidian: { light: obsidianLight, dark: obsidianDark },
+  substack: { light: substackLight, dark: substackDark },
+  twitter: { light: twitterLight, dark: twitterDark },
+  spotify: { light: spotifyLight, dark: spotifyDark },
+  notion: { light: notionLight, dark: notionDark },
 };
 
 interface ThemeContextType {
