@@ -1,12 +1,26 @@
 import { ConvexError, v } from "convex/values";
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { mutation, query } from "./_generated/server";
 
 const CHECKIN_HISTORY_LIMIT = 400; // ~13 months of daily check-ins, plenty for a streak calc
 
+async function requireUserId(ctx: any) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new ConvexError("Not signed in");
+    return userId;
+}
+
 export const getHabitsOverview = query({
     args: {},
     handler: async (ctx) => {
-        const habits = await ctx.db.query("habits").order("desc").take(200);
+        const userId = await getAuthUserId(ctx);
+        if (!userId) return [];
+
+        const habits = await ctx.db
+            .query("habits")
+            .withIndex("by_user", (q) => q.eq("userId", userId))
+            .order("desc")
+            .take(200);
 
         const overview = [];
         for (const habit of habits) {
@@ -32,7 +46,9 @@ export const createHabit = mutation({
         color: v.string(),
     },
     handler: async (ctx, args) => {
+        const userId = await requireUserId(ctx);
         const habitId = await ctx.db.insert("habits", {
+            userId,
             name: args.name,
             color: args.color,
             createdAt: Date.now(),
@@ -44,6 +60,11 @@ export const createHabit = mutation({
 export const deleteHabit = mutation({
     args: { id: v.id("habits") },
     handler: async (ctx, args) => {
+        const userId = await requireUserId(ctx);
+        const habit = await ctx.db.get(args.id);
+        if (!habit) return;
+        if (habit.userId !== userId) throw new ConvexError("Not authorized");
+
         const checkins = await ctx.db
             .query("habitCheckins")
             .withIndex("by_habit", (q) => q.eq("habitId", args.id))
@@ -64,8 +85,10 @@ export const toggleCheckin = mutation({
         dateKey: v.string(),
     },
     handler: async (ctx, args) => {
+        const userId = await requireUserId(ctx);
         const habit = await ctx.db.get(args.habitId);
         if (!habit) throw new ConvexError("Habit not found");
+        if (habit.userId !== userId) throw new ConvexError("Not authorized");
 
         const existing = await ctx.db
             .query("habitCheckins")

@@ -1,11 +1,14 @@
+import AccountSection from "@/components/AccountSection";
 import BackupExport from "@/components/BackupExport";
 import DangerZone from "@/components/DangerZone";
 import Preferences from "@/components/Preferences";
 import ProgressStats from "@/components/ProgressStats";
+import { api } from "@/convex/_generated/api";
 import useTheme from "@/hooks/useTheme";
 import { loadProfile, pickAndSaveProfilePhoto, saveProfileName } from "@/lib/profile";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useQuery } from "convex/react";
+import { useEffect, useRef, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 interface ProfileContentProps {
@@ -17,6 +20,8 @@ export default function ProfileContent({ onClose }: ProfileContentProps) {
   const [name, setName] = useState("");
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const styles = createStyles(colors);
+  const authUser = useQuery(api.users.current);
+  const hasAppliedAuthName = useRef(false);
 
   useEffect(() => {
     loadProfile().then((p) => {
@@ -24,6 +29,20 @@ export default function ProfileContent({ onClose }: ProfileContentProps) {
       setPhotoUri(p.photoUri);
     });
   }, []);
+
+  // First time we learn the signed-up name (from account creation) and the
+  // person hasn't set a local display name yet, use it as a sensible default
+  // rather than leaving the name field blank.
+  useEffect(() => {
+    if (hasAppliedAuthName.current) return;
+    if (!authUser?.name) return;
+    setName((current) => {
+      if (current.trim().length > 0) return current;
+      hasAppliedAuthName.current = true;
+      saveProfileName(authUser.name!);
+      return authUser.name!;
+    });
+  }, [authUser?.name]);
 
   const handlePickPhoto = async () => {
     const uri = await pickAndSaveProfilePhoto();
@@ -75,6 +94,7 @@ export default function ProfileContent({ onClose }: ProfileContentProps) {
       <ProgressStats />
       <Preferences />
       <BackupExport />
+      <AccountSection />
       <DangerZone />
     </ScrollView>
   );

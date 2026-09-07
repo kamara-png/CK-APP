@@ -62,15 +62,17 @@ This file wraps literally every screen in the app. It's responsible for, in orde
 
 If you ever add a whole new top-level screen (not a tab, not a note — something like a full-screen onboarding flow), you register it here as a new `<Stack.Screen name="..." />`.
 
-#### 3.2 `app/(tabs)/_layout.tsx` — the tab bar itself
+#### 3.2 `app/(tabs)/_layout.tsx` and `app/(tabs)/index.tsx` — the pager and its tab bar
 
-This is a short file that lists exactly 3 `<Tabs.Screen>` entries: `index` (Todos), `streaks`, `statistics`. Each one sets:
-- `title` — the label under the icon
-- `tabBarIcon` — which Ionicons icon to show (see §10.2 for how to change these)
+As of the auth/animation rewrite, this is no longer a React Navigation `<Tabs>` navigator. `_layout.tsx` is now just a pass-through `<Stack>` with one screen; all the real work happens in `index.tsx`, which renders a `react-native-pager-view` `<PagerView>` containing the three screen components (`TodosScreen`, `StreaksScreen`, `StatisticsScreen`, all now living in `components/screens/`) as its pages, plus a custom bottom tab bar drawn underneath it.
 
-**There is intentionally no 4th tab for the profile/settings.** That's opened separately — see §3.6.
+Why the rewrite: the old setup used React Navigation's bottom-tabs, which **jump-cuts** to the new screen on tap or swipe — there's no continuous drag. `SwipeTabScreen.tsx` tried to fake the feel by replaying a settle animation *after* the jump, but it could never actually follow your finger mid-drag the way Instagram's feed/reels paging does. `PagerView` is a real native pager, so dragging halfway between tabs now visually shows both pages moving together in real time.
 
-#### 3.3 `app/(tabs)/index.tsx` — the Todos screen (the biggest file in the app)
+The bottom tab bar is custom-built (not React Navigation's), and its icons are driven by `onPageScroll`'s continuous `position + offset` value (stored in a Reanimated shared value) rather than only updating on settle — that's what makes the active icon scale up and cross-fade smoothly *during* the drag instead of snapping at the end.
+
+**There is intentionally no 4th tab for the profile/settings.** That's opened separately — see §3.6. Because the drawer now lives in the pager host (not inside the Todos screen specifically), the hamburger icon works from any of the three tabs.
+
+#### 3.3 `components/screens/TodosScreen.tsx` — the Todos screen (the biggest file in the app)
 
 This is the most feature-dense screen. It handles:
 - The search bar
@@ -80,14 +82,13 @@ This is the most feature-dense screen. It handles:
 - Delete via the trash icon **or** swipe, both of which go through a 1-second "undo" window (see §8.1) before actually deleting
 - The floating "+" button (FAB) bottom-right, which opens `AddTodoModal` to create a new todo
 - After a todo is created, `ReminderEditor` automatically opens so you can immediately set a reminder — this is the "baked into creation" reminder flow
-- The hamburger icon (top-left) which opens the `ProfileDrawer`
-- The whole screen is wrapped in `SwipeTabScreen` so swiping left/right switches tabs
+- The hamburger icon (top-left), which calls the `onMenuPress` prop passed down from the pager host in `app/(tabs)/index.tsx` to open the `ProfileDrawer`
 
-#### 3.4 `app/(tabs)/streaks.tsx` — the habit tracker
+#### 3.4 `components/screens/StreaksScreen.tsx` — the habit tracker
 
 Shows a card per habit with: a flame badge + current streak number, name, a 7-day dot history, and the big flame check-in button. Tapping "+" opens `HabitEditor` to create a new habit (name + color). Swiping a card left checks it in for today; swiping right deletes it (same `SwipeableRow` component as Todos, for a consistent feel across the app).
 
-#### 3.5 `app/(tabs)/statistics.tsx` — the stats screen
+#### 3.5 `components/screens/StatisticsScreen.tsx` — the stats screen
 
 Reads from **both** the Todos backend and the Habits backend, and renders:
 - A circular completion-rate ring (`ProgressRing`)
@@ -99,7 +100,7 @@ Reads from **both** the Todos backend and the Habits backend, and renders:
 
 #### 3.6 The Profile drawer — not a file in `app/`, a component
 
-Unlike the tabs, the Profile "screen" isn't a route at all — it's `components/ProfileDrawer.tsx` + `components/ProfileContent.tsx`, rendered directly inside `app/(tabs)/index.tsx` and toggled open/closed with local state (`drawerOpen`). It slides in from the left over whatever tab you're on. Inside it: your editable name + photo, the theme picker, the stats summary, and the "danger zone" (clear all todos).
+Unlike the tabs, the Profile "screen" isn't a route at all — it's `components/ProfileDrawer.tsx` + `components/ProfileContent.tsx`, rendered once in `app/(tabs)/index.tsx` (the pager host) and toggled open/closed with local state (`drawerOpen`), reachable from any of the three tabs via their hamburger icon. It slides in from the left over whatever tab you're on. Inside it: your editable name + photo, the theme picker, the stats summary, your signed-in email + sign-out button (`AccountSection`), and the "danger zone" (clear all todos).
 
 #### 3.7 `app/notes/` — the Notes feature
 
@@ -127,7 +128,8 @@ Nothing in here is a screen by itself — these are building blocks used *inside
 | `ProgressStats.tsx` | The Total/Completed/Remaining mini-cards shown in the Profile drawer |
 | `ReminderEditor.tsx` | The popup for picking a reminder date/time/sound |
 | `SwipeableRow.tsx` | Wraps any row to add swipe-left/swipe-right actions (used by both Todos and Streaks) |
-| `SwipeTabScreen.tsx` | Wraps a whole tab screen so swiping left/right switches to the next/previous tab |
+| `AccountSection.tsx` | Signed-in email + sign-out button, shown in the Profile drawer |
+| `auth/SignInScreen.tsx` | The email/password sign-in and sign-up screen shown when nobody's logged in |
 | `TodoEditor.tsx` | The popup for editing an existing todo's text + reminder together |
 | `UndoToast.tsx` | The little "Todo deleted [UNDO]" banner at the bottom of the screen |
 | `WeeklyActivityChart.tsx` | The 7-day bar chart on Statistics |
@@ -144,12 +146,32 @@ This is where your data actually lives and where the rules for reading/writing i
 
 | File | Table(s) it manages | Key functions |
 |---|---|---|
-| `schema.ts` | Defines `todos`, `notes`, `habits`, `habitCheckins` | — |
+| `schema.ts` | Defines `...authTables` (users/sessions/accounts), `todos`, `notes`, `habits`, `habitCheckins` | — |
+| `auth.ts` | — | Configures the Password provider (Convex Auth) |
+| `auth.config.ts` | — | Tells Convex to trust its own Convex Auth tokens |
+| `http.ts` | — | Registers the HTTP routes Convex Auth needs |
+| `users.ts` | `users` | `current` (the signed-in user's own doc) |
 | `todos.ts` | `todos` | `getTodos`, `addTodo`, `toggleTodo`, `updateTodo`, `setReminder`, `deleteTodo`, `clearAllTodos` |
 | `notes.ts` | `notes` | `getNotes`, `getNote`, `createNote`, `updateNote`, `deleteNote`, `findNoteByTitle`, `getBacklinks` |
 | `habits.ts` | `habits`, `habitCheckins` | `getHabitsOverview`, `createHabit`, `deleteHabit`, `toggleCheckin` |
 
+Every todo/note/habit row now carries a `userId` and every query/mutation in `todos.ts`/`notes.ts`/`habits.ts` scopes to `getAuthUserId(ctx)` — an unauthenticated call gets an empty list back, and mutating something you don't own throws.
+
 **Important habit:** any time you change `schema.ts` or add a new function, you must have `npx convex dev` running locally — it's what actually pushes those changes to your live Convex deployment. Nothing works until it does.
+
+#### 3.8b Authentication — one-time setup you need to do
+
+The app now requires an account (email + password, via [Convex Auth](https://labs.convex.dev/auth)). Before it'll work against a fresh Convex deployment, you need to generate a signing key pair once:
+
+```bash
+npx @convex-dev/auth
+```
+
+This CLI walks you through generating `JWT_PRIVATE_KEY` and `JWKS` and setting them directly on your Convex deployment (via `npx convex env set`), plus double-checking `SITE_URL` is set. If you'd rather do it by hand, `npx convex env set` each of the two values yourself — see the [manual setup guide](https://labs.convex.dev/auth/setup/manual).
+
+Because we started fresh rather than migrating old data (a deliberate choice — the pre-auth todos/notes/habits in your dev deployment don't have a `userId` and won't pass the new schema), you'll want to clear out any old rows before your first `npx convex dev` push after this change, or the schema push will fail validation. Easiest way: open the Convex dashboard's Data tab and delete all rows in `todos`, `notes`, `habits`, and `habitCheckins` before pulling this update.
+
+Once that's done, `npx convex dev` will apply the new schema, and the app will show the sign-in screen on next launch — create an account and you're in.
 
 ---
 
@@ -167,8 +189,7 @@ This is where your data actually lives and where the rules for reading/writing i
 ### `assets/` — images, fonts, and (2 leftover) style files
 
 - **`assets/images/`** — app icon, splash screen, adaptive icons.
-- **`assets/styles/settings.styles.ts`** — shared style definitions used by `Preferences.tsx`, `ProgressStats.tsx`, and `DangerZone.tsx` (the Profile drawer's sections).
-- **`assets/styles/home.styles.ts`** — ⚠️ **this file is unused.** It's leftover from an earlier draft of the Todos screen before it was rewritten with its own inline styles. Safe to delete, or safe to ignore.
+- **`assets/styles/settings.styles.ts`** — shared style definitions used by `Preferences.tsx`, `ProgressStats.tsx`, `DangerZone.tsx`, and `AccountSection.tsx` (the Profile drawer's sections).
 
 ---
 

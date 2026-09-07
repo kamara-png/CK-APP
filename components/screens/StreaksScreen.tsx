@@ -1,7 +1,6 @@
 import BouncyIcon from "@/components/BouncyIcon";
 import HabitEditor from "@/components/HabitEditor";
 import SwipeableRow from "@/components/SwipeableRow";
-import SwipeTabScreen from "@/components/SwipeTabScreen";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import useTheme from "@/hooks/useTheme";
@@ -21,7 +20,11 @@ import {
 
 const DAY_LABELS = ["S", "M", "T", "W", "Th", "F", "Sat"];
 
-export default function StreaksScreen() {
+interface StreaksScreenProps {
+  onMenuPress: () => void;
+}
+
+export default function StreaksScreen({ onMenuPress }: StreaksScreenProps) {
   const { colors } = useTheme();
   const overview = useQuery(api.habits.getHabitsOverview);
   const createHabit = useMutation(api.habits.createHabit);
@@ -45,10 +48,14 @@ export default function StreaksScreen() {
   };
 
   return (
-    <SwipeTabScreen path="/streaks">
+    <>
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity onPress={onMenuPress} style={styles.headerAction}>
+          <Ionicons name="menu" size={30} color={colors.text} />
+        </TouchableOpacity>
         <Text style={styles.title}>Streaks</Text>
+        <View style={styles.headerAction} />
       </View>
 
       {overview === undefined ? (
@@ -155,7 +162,7 @@ export default function StreaksScreen() {
                 <Ionicons name="add" size={30} color="#fff" />
               </TouchableOpacity>
     </View>
-    </SwipeTabScreen>
+    </>
   );
 }
 
@@ -173,6 +180,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       alignItems: "center",
       marginBottom: 16,
     },
+    headerAction: { width: 30 },
     title: {
       fontSize: 30,
       fontWeight: "900",

@@ -1,9 +1,22 @@
 import { ConvexError, v } from "convex/values";
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { mutation, query } from "./_generated/server";
+
+async function requireUserId(ctx: any) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new ConvexError("Not signed in");
+    return userId;
+}
 
 export const getTodos = query ({
     handler: async (ctx) => {
-        const todos = await ctx.db.query("todos").order("desc").collect()
+        const userId = await getAuthUserId(ctx);
+        if (!userId) return [];
+        const todos = await ctx.db
+            .query("todos")
+            .withIndex("by_user", (q) => q.eq("userId", userId))
+            .order("desc")
+            .collect()
         return todos;
     },
 }); 
@@ -20,7 +33,9 @@ export const addTodo = mutation({
         )),
     },
     handler: async(ctx,args) => {
+        const userId = await requireUserId(ctx);
         const todoId =await ctx.db.insert("todos", {
+            userId,
             text: args.text,
             iscompleted: false,
             reminderAt: args.reminderAt,
@@ -43,8 +58,10 @@ export const addTodo = mutation({
             )),
         },
         handler: async(ctx,args) => {
+            const userId = await requireUserId(ctx);
             const todo = await ctx.db.get(args.id)
             if(!todo) throw new ConvexError("Todo not found")
+            if(todo.userId !== userId) throw new ConvexError("Not authorized")
 
             await ctx.db.patch(args.id,{
                 reminderAt: args.reminderAt,
@@ -56,8 +73,10 @@ export const addTodo = mutation({
        export const toggleTodo = mutation({
         args:{id:v.id("todos")},
         handler: async(ctx,args) => {
+            const userId = await requireUserId(ctx);
             const todo = await ctx.db.get(args.id)
             if(!todo) throw new ConvexError("Todo not found")
+            if(todo.userId !== userId) throw new ConvexError("Not authorized")
 
             const nowCompleted = !todo.iscompleted
             await ctx.db.patch(args.id,{
@@ -70,6 +89,10 @@ export const addTodo = mutation({
     export const deleteTodo = mutation({
         args: {id: v.id("todos") },
         handler: async(ctx,args) => {
+            const userId = await requireUserId(ctx);
+            const todo = await ctx.db.get(args.id)
+            if(!todo) return;
+            if(todo.userId !== userId) throw new ConvexError("Not authorized")
             await ctx.db.delete(args.id);
         },
     });
@@ -80,6 +103,10 @@ export const addTodo = mutation({
             text: v.string(),
         },
         handler: async(ctx,args) => {
+            const userId = await requireUserId(ctx);
+            const todo = await ctx.db.get(args.id)
+            if(!todo) throw new ConvexError("Todo not found")
+            if(todo.userId !== userId) throw new ConvexError("Not authorized")
             await ctx.db.patch(args.id,{
                 text: args.text,
             });
@@ -90,7 +117,11 @@ export const addTodo = mutation({
 
     export const clearAllTodos = mutation({
         handler: async (ctx) => {
-            const todos = await ctx.db.query("todos").collect();
+            const userId = await requireUserId(ctx);
+            const todos = await ctx.db
+                .query("todos")
+                .withIndex("by_user", (q) => q.eq("userId", userId))
+                .collect();
 
             //Deletes all Todos
             for(const todo of todos) {

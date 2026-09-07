@@ -1,9 +1,13 @@
+import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 
 import { v } from "convex/values";
 
 export default defineSchema({
+    ...authTables,
+
     todos:defineTable({
+        userId: v.id("users"),
         text:v.string(),
         iscompleted:v.boolean(),
         completedAt: v.optional(v.number()),
@@ -14,19 +18,21 @@ export default defineSchema({
             v.literal("chime"),
             v.literal("silent")
         )),
-}),
+}).index("by_user", ["userId"]),
     notes: defineTable({
+        userId: v.id("users"),
         title: v.string(),
         content: v.string(),
         updatedAt: v.number(),
         color: v.optional(v.string()),
-    }).index("by_updatedAt", ["updatedAt"]),
+    }).index("by_user_updatedAt", ["userId", "updatedAt"]),
 
     habits: defineTable({
+        userId: v.id("users"),
         name: v.string(),
         color: v.string(),
         createdAt: v.number(),
-    }),
+    }).index("by_user", ["userId"]),
 
     habitCheckins: defineTable({
         habitId: v.id("habits"),

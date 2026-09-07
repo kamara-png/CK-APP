@@ -1,459 +1,164 @@
-import AddTodoModal from "@/components/AddTodoModal";
-import BouncyIcon from "@/components/BouncyIcon";
 import ProfileContent from "@/components/ProfileContent";
 import ProfileDrawer from "@/components/ProfileDrawer";
-import ReminderEditor from "@/components/ReminderEditor";
-import SwipeableRow from "@/components/SwipeableRow";
-import SwipeTabScreen from "@/components/SwipeTabScreen";
-import TodoEditor from "@/components/TodoEditor";
-import UndoToast from "@/components/UndoToast";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
-import { useSlowLoadingHint } from "@/hooks/useSlowLoadingHint";
+import StatisticsScreen from "@/components/screens/StatisticsScreen";
+import StreaksScreen from "@/components/screens/StreaksScreen";
+import TodosScreen from "@/components/screens/TodosScreen";
 import useTheme from "@/hooks/useTheme";
-import {
-  cancelTodoReminder,
-  ensureNotificationPermission,
-  ReminderSound,
-  scheduleTodoReminder,
-} from "@/lib/notifications";
 import { Ionicons } from "@expo/vector-icons";
-import { useMutation, useQuery } from "convex/react";
-import { useRouter } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { useCallback, useRef, useState } from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import PagerView from "react-native-pager-view";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 
-type ReminderTarget = { kind: "existing"; id: Id<"todos"> };
+const TABS = [
+  { key: "todos", icon: "flash-outline" as const, activeIcon: "flash" as const },
+  { key: "streaks", icon: "flame-outline" as const, activeIcon: "flame" as const },
+  { key: "statistics", icon: "podium-outline" as const, activeIcon: "podium" as const },
+];
 
-const UNDO_WINDOW_MS = 3_000;
-
-function dayKey(ms: number) {
-  const d = new Date(ms);
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-}
-
-function dayLabel(ms: number) {
-  const d = new Date(ms);
-  const today = new Date();
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
-  if (dayKey(ms) === dayKey(today.getTime())) return "Today";
-  if (dayKey(ms) === dayKey(yesterday.getTime())) return "Yesterday";
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-}
-
-export default function Index() {
+export default function TabsIndex() {
   const { colors } = useTheme();
-  const router = useRouter();
-  const [search, setSearch] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [addModalOpen, setAddModalOpen] = useState(false);
-  const [editorOpen, setEditorOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<Id<"todos"> | null>(null);
-  const [pendingDeleteId, setPendingDeleteId] = useState<Id<"todos"> | null>(null);
-  const deleteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pagerRef = useRef<PagerView>(null);
 
-  const todos = useQuery(api.todos.getTodos);
-  const addTodo = useMutation(api.todos.addTodo);
-  const toggleTodo = useMutation(api.todos.toggleTodo);
-  const deleteTodo = useMutation(api.todos.deleteTodo);
-  const updateTodo = useMutation(api.todos.updateTodo);
-  const setReminder = useMutation(api.todos.setReminder);
-  const slowLoading = useSlowLoadingHint(todos === undefined);
+  // Continuous 0..(TABS.length - 1) scroll position, updated on every frame
+  // of the drag — not just on settle — so the tab bar can track the finger
+  // the same way Instagram's bottom bar highlight tracks its feed/reels swipe.
+  const scrollPosition = useSharedValue(0);
 
-  const [reminderTarget, setReminderTarget] = useState<ReminderTarget | null>(null);
+  const handlePageScroll = useCallback(
+    (event: { nativeEvent: { position: number; offset: number } }) => {
+      const { position, offset } = event.nativeEvent;
+      scrollPosition.value = position + offset;
+    },
+    [scrollPosition]
+  );
 
-  useEffect(() => {
-    return () => {
-      if (deleteTimer.current) clearTimeout(deleteTimer.current);
-    };
-  }, []);
-
-  const visibleTodos = useMemo(() => {
-    if (!todos) return [];
-    const q = search.trim().toLowerCase();
-    const base = q ? todos.filter((t) => t.text.toLowerCase().includes(q)) : todos;
-    return base.filter((t) => t._id !== pendingDeleteId);
-  }, [todos, search, pendingDeleteId]);
-
-  const handleCreate = async (
-    text: string,
-    reminderAt?: number,
-    reminderSound?: ReminderSound
-  ) => {
-    setAddModalOpen(false);
-    const todoId = await addTodo({ text, reminderAt, reminderSound });
-
-    if (reminderAt && reminderSound) {
-      if (reminderAt <= Date.now()) {
-        Alert.alert("Choose a future time", "The alarm time must be later than now.");
-        return;
-      }
-
-      const granted = await ensureNotificationPermission();
-      if (granted) {
-        await scheduleTodoReminder(todoId, text, new Date(reminderAt), reminderSound);
-      } else {
-        Alert.alert(
-          "Notifications are off",
-          "The task was added, but your alarm could not be scheduled without notification permission."
-        );
-      }
-    }
+  const goToPage = (index: number) => {
+    pagerRef.current?.setPage(index);
   };
 
-  const handleSaveReminder = async (date: Date, sound: ReminderSound) => {
-    if (!reminderTarget) return;
-    const granted = await ensureNotificationPermission();
-    const todo = todos?.find((t) => t._id === reminderTarget.id);
-    await setReminder({ id: reminderTarget.id, reminderAt: date.getTime(), reminderSound: sound });
-    if (granted) {
-      await scheduleTodoReminder(reminderTarget.id, todo?.text ?? "Todo reminder", date, sound);
-    }
-    setReminderTarget(null);
-  };
-
-  const handleClearReminder = async () => {
-    if (!reminderTarget) return;
-    await setReminder({ id: reminderTarget.id, reminderAt: undefined, reminderSound: undefined });
-    await cancelTodoReminder(reminderTarget.id);
-    setReminderTarget(null);
-  };
-
-  const handleSwipeOrIconDelete = (id: Id<"todos">) => {
-    setPendingDeleteId(id);
-    if (deleteTimer.current) clearTimeout(deleteTimer.current);
-    deleteTimer.current = setTimeout(() => {
-      void (async () => {
-        await cancelTodoReminder(id);
-        await deleteTodo({ id });
-        setPendingDeleteId(null);
-      })();
-    }, UNDO_WINDOW_MS);
-  };
-
-  const handleUndoDelete = () => {
-    if (deleteTimer.current) clearTimeout(deleteTimer.current);
-    setPendingDeleteId(null);
-  };
-
-  const handleSaveEdit = async (
-    text: string,
-    reminderAt?: number,
-    reminderSound?: ReminderSound
-  ) => {
-    if (!editTarget) return;
-    await updateTodo({ id: editTarget, text });
-    await setReminder({ id: editTarget, reminderAt, reminderSound });
-    if (reminderAt && reminderSound) {
-      const granted = await ensureNotificationPermission();
-      if (granted) await scheduleTodoReminder(editTarget, text, new Date(reminderAt), reminderSound);
-    } else {
-      await cancelTodoReminder(editTarget);
-    }
-    setEditTarget(null);
-  };
+  const openDrawer = useCallback(() => setDrawerOpen(true), []);
 
   const styles = createStyles(colors);
-  const editingTodo = editTarget ? todos?.find((t) => t._id === editTarget) : undefined;
 
   return (
-    <SwipeTabScreen path="/">
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => setDrawerOpen(true)} style={styles.headerAction}>
-            <Ionicons name="menu" size={30} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.title}>To-dos</Text>
-          <TouchableOpacity onPress={() => router.push("/notes")}>
-            <Ionicons name="duplicate-outline" size={30} color={colors.text} />
-          </TouchableOpacity>
+    <View style={styles.flex}>
+      <PagerView
+        ref={pagerRef}
+        style={styles.flex}
+        initialPage={0}
+        onPageScroll={handlePageScroll}
+      >
+        <View key="todos" style={styles.flex}>
+          <TodosScreen onMenuPress={openDrawer} />
         </View>
-
-        <View style={styles.searchRow}>
-          <Ionicons name="search" size={16} color={colors.textMuted} />
-          <TextInput
-            style={styles.searchInput}
-            value={search}
-            onChangeText={setSearch}
-            placeholder="Search your tasks..."
-            placeholderTextColor={colors.textMuted}
-          />
+        <View key="streaks" style={styles.flex}>
+          <StreaksScreen onMenuPress={openDrawer} />
         </View>
+        <View key="statistics" style={styles.flex}>
+          <StatisticsScreen onMenuPress={openDrawer} />
+        </View>
+      </PagerView>
 
-        {todos === undefined ? (
-          <View style={{ marginTop: 24, alignItems: "center" }}>
-            <ActivityIndicator color={colors.primary} />
-            {slowLoading && (
-              <Text style={styles.hint}>
-                Still connecting — make sure `npx convex dev` is running and
-                EXPO_PUBLIC_CONVEX_URL is set correctly, then restart Expo.
-              </Text>
-            )}
-          </View>
-        ) : (
-          <FlatList
-            data={visibleTodos}
-            keyExtractor={(item) => item._id}
-            contentContainerStyle={styles.list}
-            ListEmptyComponent={
-              <Text style={styles.empty}>
-                {todos.length === 0 ? "No todos yet , tap + to add moja tu." : "hakuna match."}
-              </Text>
-            }
-            renderItem={({ item, index }) => {
-              const prev = visibleTodos[index - 1];
-              const showDateHeader = !prev || dayKey(prev._creationTime) !== dayKey(item._creationTime);
-
-              return (
-                <View>
-                  {showDateHeader && (
-                    <Text style={[styles.dateHeader, index > 0 && { marginTop: 20 }]}>
-                      {dayLabel(item._creationTime)}
-                    </Text>
-                  )}
-                  <SwipeableRow
-                    style={{ marginBottom: 8 }}
-                    completeColor={colors.success}
-                    deleteColor={colors.danger}
-                    onSwipeComplete={() => toggleTodo({ id: item._id as Id<"todos"> })}
-                    onSwipeDelete={() => handleSwipeOrIconDelete(item._id as Id<"todos">)}
-                  >
-                    <View style={styles.row}>
-                      <TouchableOpacity
-                        style={styles.rowLeft}
-                        onPress={() => toggleTodo({ id: item._id as Id<"todos"> })}
-                      >
-                        <BouncyIcon active={item.iscompleted}>
-                          <View
-                            style={[
-                              styles.checkbox,
-                              item.iscompleted
-                                ? { backgroundColor: colors.success, borderColor: colors.success }
-                                : { borderColor: colors.textMuted },
-                            ]}
-                          >
-                            {item.iscompleted && (
-                              <Ionicons name="checkmark" size={20} color="#fff" />
-                            )}
-                          </View>
-                        </BouncyIcon>
-                        <View style={{ flex: 1 }}>
-                          <Text
-                            style={[styles.rowText, item.iscompleted && styles.rowTextDone]}
-                          >
-                            {item.text}
-                          </Text>
-                          {item.reminderAt && (
-                            <View style={styles.reminderChip}>
-                              <Ionicons name="alarm" size={12} color={colors.primary} />
-                              <Text style={styles.reminderChipText}>
-                                {new Date(item.reminderAt).toLocaleString(undefined, {
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "numeric",
-                                  minute: "2-digit",
-                                })}
-                              </Text>
-                            </View>
-                          )}
-                        </View>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => setEditTarget(item._id as Id<"todos">)}
-                        style={{ paddingHorizontal: 6 }}
-                      >
-                        <Ionicons name="color-wand" size={18} color={colors.textMuted} />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => handleSwipeOrIconDelete(item._id as Id<"todos">)}
-                      >
-                        <Ionicons name="trash" size={20} color={colors.danger} />
-                      </TouchableOpacity>
-                    </View>
-                  </SwipeableRow>
-                </View>
-              );
-            }}
+      <View style={[styles.tabBar, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+        {TABS.map((tab, index) => (
+          <TabBarIcon
+            key={tab.key}
+            index={index}
+            icon={tab.icon}
+            activeIcon={tab.activeIcon}
+            scrollPosition={scrollPosition}
+            activeColor={colors.primary}
+            inactiveColor={colors.textMuted}
+            onPress={() => goToPage(index)}
           />
-        )}
-
-        <TouchableOpacity
-          style={[styles.fab, { backgroundColor: colors.primary }]}
-          onPress={() => setAddModalOpen(true)}
-        >
-          <Ionicons name="add" size={30} color="#fff" />
-        </TouchableOpacity>
-
-        <UndoToast
-          visible={pendingDeleteId !== null}
-          message="Todo deleted"
-          colors={colors}
-          onUndo={handleUndoDelete}
-        />
+        ))}
       </View>
-
-      <AddTodoModal
-        visible={addModalOpen}
-        colors={colors}
-        onSubmit={handleCreate}
-        onClose={() => setAddModalOpen(false)}
-      />
-
-      <ReminderEditor
-        visible={reminderTarget !== null}
-        initialDate={new Date(Date.now() + 60 * 60 * 1000)}
-        initialSound="default"
-        hasExistingReminder={false}
-        colors={colors}
-        onSave={handleSaveReminder}
-        onClear={handleClearReminder}
-        onClose={() => setReminderTarget(null)}
-      />
-
-      <TodoEditor
-        visible={editTarget !== null}
-        initialText={editingTodo?.text ?? ""}
-        initialReminderAt={editingTodo?.reminderAt}
-        initialReminderSound={editingTodo?.reminderSound as ReminderSound | undefined}
-        colors={colors}
-        onSave={handleSaveEdit}
-        onClose={() => setEditTarget(null)}
-      />
 
       <ProfileDrawer visible={drawerOpen} colors={colors} onClose={() => setDrawerOpen(false)}>
         <ProfileContent onClose={() => setDrawerOpen(false)} />
       </ProfileDrawer>
-    </SwipeTabScreen>
+    </View>
   );
 }
 
+interface TabBarIconProps {
+  index: number;
+  icon: keyof typeof Ionicons.glyphMap;
+  activeIcon: keyof typeof Ionicons.glyphMap;
+  scrollPosition: ReturnType<typeof useSharedValue<number>>;
+  activeColor: string;
+  inactiveColor: string;
+  onPress: () => void;
+}
+
+function TabBarIcon({
+  index,
+  icon,
+  activeIcon,
+  scrollPosition,
+  activeColor,
+  inactiveColor,
+  onPress,
+}: TabBarIconProps) {
+  // Distance (0 = dead-center-active, 1 = one full page away) drives both a
+  // scale bump and a cross-fade between the outline/filled icon,
+  // continuously as the pager is dragged — this is the bit that makes the
+  // bar feel alive mid-swipe instead of just snapping at the end.
+  const scaleStyle = useAnimatedStyle(() => {
+    const distance = Math.min(1, Math.abs(scrollPosition.value - index));
+    return {
+      transform: [{ scale: 1 + (1 - distance) * 0.12 }],
+    };
+  });
+
+  const activeStyle = useAnimatedStyle(() => {
+    const distance = Math.min(1, Math.abs(scrollPosition.value - index));
+    return { opacity: 1 - distance };
+  });
+
+  const inactiveStyle = useAnimatedStyle(() => {
+    const distance = Math.min(1, Math.abs(scrollPosition.value - index));
+    return { opacity: distance };
+  });
+
+  return (
+    <TouchableOpacity style={iconStyles.tabButton} onPress={onPress} activeOpacity={0.7}>
+      <Animated.View style={scaleStyle}>
+        <Animated.View style={[iconStyles.iconLayer, activeStyle]}>
+          <Ionicons name={activeIcon} size={26} color={activeColor} />
+        </Animated.View>
+        <Animated.View style={inactiveStyle}>
+          <Ionicons name={icon} size={26} color={inactiveColor} />
+        </Animated.View>
+      </Animated.View>
+    </TouchableOpacity>
+  );
+}
+
+const iconStyles = StyleSheet.create({
+  tabButton: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconLayer: {
+    position: "absolute",
+  },
+});
+
 const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-      paddingHorizontal: 16,
-      paddingTop: 60,
-    },
-    header: {
+    flex: { flex: 1, backgroundColor: colors.bg },
+    tabBar: {
       flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 16,
-    },
-    headerAction: { width: 30 },
-    title: {
-      fontSize: 30,
-      fontWeight: "900",
-      flex: 1,
-      textAlign: "center",
-      color: colors.text,
-    },
-    searchRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-      backgroundColor: colors.backgrounds.input,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 10,
-      paddingHorizontal: 12,
-      marginBottom: 16,
-    },
-    searchInput: {
-      flex: 1,
-      paddingVertical: 8,
-      color: colors.text,
-    },
-    list: {
-      paddingBottom: 100,
-    },
-    dateHeader: {
-      color: colors.textMuted,
-      fontSize: 13,
-      fontWeight: "700",
-      marginBottom: 8,
-    },
-    row: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      backgroundColor: colors.surface,
-      borderRadius: 10,
-      paddingHorizontal: 14,
-      paddingVertical: 12,
-      gap: 4,
-    },
-    rowLeft: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 12,
-      flex: 1,
-    },
-    checkbox: {
-      width: 28,
-      height: 28,
-      borderRadius: 10,
-      borderWidth: 2,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    rowText: {
-      color: colors.text,
-      fontSize: 16,
-      flexShrink: 1,
-    },
-    rowTextDone: {
-      textDecorationLine: "line-through",
-      color: colors.textMuted,
-    },
-    reminderChip: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 4,
-      marginTop: 4,
-    },
-    reminderChipText: {
-      fontSize: 11,
-      color: colors.primary,
-      fontWeight: "600",
-    },
-    empty: {
-      color: colors.textMuted,
-      textAlign: "center",
-      marginTop: 40,
-    },
-    hint: {
-      color: colors.textMuted,
-      textAlign: "center",
-      marginTop: 12,
-      paddingHorizontal: 24,
-      fontSize: 13,
-      lineHeight: 18,
-    },
-    fab: {
-      position: "absolute",
-      right: 20,
-      bottom: 30,
-      width: 58,
-      height: 58,
-      borderRadius: 18,
-      alignItems: "center",
-      justifyContent: "center",
-      elevation: 6,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.3,
-      shadowRadius: 5,
+      height: 90,
+      paddingBottom: 30,
+      paddingTop: 10,
+      borderTopWidth: 1,
     },
   });

@@ -1,4 +1,6 @@
+import SignInScreen from "@/components/auth/SignInScreen";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { secureTokenStorage } from "@/lib/authStorage";
 import { configureNotifications } from "@/lib/notifications";
 import {
     Inter_400Regular,
@@ -7,10 +9,11 @@ import {
     Inter_700Bold,
     useFonts,
 } from "@expo-google-fonts/inter";
-import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { ConvexAuthProvider, useConvexAuth } from "@convex-dev/auth/react";
+import { ConvexReactClient } from "convex/react";
 import { Stack } from "expo-router";
-import { useEffect } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { ReactNode, useEffect } from "react";
+import { ActivityIndicator, StyleSheet, Text, TextInput, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const convexUrl = process.env.EXPO_PUBLIC_CONVEX_URL;
@@ -57,6 +60,30 @@ function MissingEnvScreen() {
   );
 }
 
+/**
+ * Gates the app's real content behind sign-in. Convex Auth reports
+ * `isLoading` while it restores a session from secure storage on launch, so
+ * we show a blank/spinner state rather than flashing the sign-in screen for
+ * users who are actually already logged in.
+ */
+function AuthGate({ children }: { children: ReactNode }) {
+  const { isLoading, isAuthenticated } = useConvexAuth();
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { backgroundColor: "#0f172a" }]}>
+        <ActivityIndicator color="#60a5fa" />
+      </View>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <SignInScreen />;
+  }
+
+  return <>{children}</>;
+}
+
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
@@ -83,15 +110,17 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ConvexProvider client={convex}>
+      <ConvexAuthProvider client={convex} storage={secureTokenStorage}>
         <ThemeProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="notes/index" options={{ presentation: "modal" }} />
-            <Stack.Screen name="notes/[id]" options={{ presentation: "modal" }} />
-          </Stack>
+          <AuthGate>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="notes/index" options={{ presentation: "modal" }} />
+              <Stack.Screen name="notes/[id]" options={{ presentation: "modal" }} />
+            </Stack>
+          </AuthGate>
         </ThemeProvider>
-      </ConvexProvider>
+      </ConvexAuthProvider>
     </GestureHandlerRootView>
   );
 }

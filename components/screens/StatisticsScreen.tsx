@@ -1,5 +1,4 @@
 import ProgressRing from "@/components/ProgressRing";
-import SwipeTabScreen from "@/components/SwipeTabScreen";
 import WeeklyActivityChart from "@/components/WeeklyActivityChart";
 import { api } from "@/convex/_generated/api";
 import { useSlowLoadingHint } from "@/hooks/useSlowLoadingHint";
@@ -7,7 +6,7 @@ import useTheme from "@/hooks/useTheme";
 import { computeStreakStats } from "@/lib/streaks";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 function formatDuration(ms: number) {
   const hours = ms / (1000 * 60 * 60);
@@ -16,7 +15,11 @@ function formatDuration(ms: number) {
   return `${Math.round(hours / 24)}d`;
 }
 
-const StatisticsScreen = () => {
+interface StatisticsScreenProps {
+  onMenuPress: () => void;
+}
+
+const StatisticsScreen = ({ onMenuPress }: StatisticsScreenProps) => {
   const { colors } = useTheme();
   const todos = useQuery(api.todos.getTodos);
   const habitsOverview = useQuery(api.habits.getHabitsOverview);
@@ -26,7 +29,6 @@ const StatisticsScreen = () => {
 
   if (todos === undefined) {
     return (
-      <SwipeTabScreen path="/statistics">
       <View style={[styles.container, styles.centered]}>
         <ActivityIndicator color={colors.primary} />
         {slowLoading && (
@@ -36,7 +38,6 @@ const StatisticsScreen = () => {
           </Text>
         )}
       </View>
-      </SwipeTabScreen>
     );
   }
 
@@ -100,9 +101,14 @@ const StatisticsScreen = () => {
   const notesThisWeek = notesList.filter((n) => n.updatedAt >= weekAgo).length;
 
   return (
-    <SwipeTabScreen path="/statistics">
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
-      <Text style={styles.title}>Statistics</Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={onMenuPress} style={styles.headerAction}>
+          <Ionicons name="menu" size={30} color={colors.text} />
+        </TouchableOpacity>
+        <Text style={styles.title}>Statistics</Text>
+        <View style={styles.headerAction} />
+      </View>
 
       {total === 0 ? (
         <Text style={styles.empty}>
@@ -237,7 +243,6 @@ const StatisticsScreen = () => {
         </>
       )}
     </ScrollView>
-    </SwipeTabScreen>
   );
 };
 
@@ -253,12 +258,18 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       justifyContent: "center",
       alignItems: "center",
     },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 16,
+    },
+    headerAction: { width: 30 },
     title: {
       fontSize: 30,
       fontWeight: "900",
       color: colors.text,
-      marginBottom: 20,
-      alignSelf: "center",
+      flex: 1,
       textAlign: "center",
     },
     ringSection: {
