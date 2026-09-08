@@ -1,4 +1,5 @@
 import ColorPicker from "@/components/ColorPicker";
+import EdgeSwipeBack from "@/components/EdgeSwipeBack";
 import FormattingToolbar, { FormatAction } from "@/components/FormattingToolbar";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import { api } from "@/convex/_generated/api";
@@ -209,6 +210,7 @@ export default function NoteEditorScreen() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <EdgeSwipeBack />
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={handleBack} style={styles.headerIconButton}>
@@ -240,7 +242,16 @@ export default function NoteEditorScreen() {
         {savedState === "saving" && <Text style={styles.savingHint}>Saving…</Text>}
 
         {mode === "write" && Platform.OS !== "ios" && (
-          <FormattingToolbar colors={colors} onFormat={applyFormat} />
+          <View style={styles.androidToolbarRow}>
+            <FormattingToolbar colors={colors} onFormat={applyFormat} />
+            <TouchableOpacity
+              style={[styles.doneChip, { backgroundColor: colors.primary }]}
+              onPress={handleBack}
+            >
+              <Ionicons name="checkmark" size={16} color="#fff" />
+              <Text style={styles.doneChipText}>Done</Text>
+            </TouchableOpacity>
+          </View>
         )}
 
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1 }}>
@@ -293,8 +304,16 @@ export default function NoteEditorScreen() {
 
       {Platform.OS === "ios" && mode === "write" && (
         <InputAccessoryView nativeID={FORMAT_TOOLBAR_ID}>
-          <View style={{ backgroundColor: colors.surface }}>
-            <FormattingToolbar colors={colors} onFormat={applyFormat} />
+          <View style={[styles.iosAccessoryRow, { backgroundColor: colors.surface }]}>
+            <View style={{ flex: 1 }}>
+              <FormattingToolbar colors={colors} onFormat={applyFormat} />
+            </View>
+            <TouchableOpacity
+              style={[styles.doneChip, { backgroundColor: colors.primary }]}
+              onPress={handleBack}
+            >
+              <Text style={styles.doneChipText}>Done</Text>
+            </TouchableOpacity>
           </View>
         </InputAccessoryView>
       )}
@@ -413,6 +432,32 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       color: colors.textMuted,
       textAlign: "center",
       marginBottom: 8,
+    },
+    androidToolbarRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    iosAccessoryRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingRight: 10,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+    },
+    doneChip: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 16,
+      marginLeft: 4,
+    },
+    doneChipText: {
+      color: "#fff",
+      fontWeight: "700",
+      fontSize: 14,
     },
     modeSwitch: {
       flexDirection: "row",

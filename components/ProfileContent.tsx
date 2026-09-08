@@ -22,6 +22,7 @@ export default function ProfileContent({ onClose }: ProfileContentProps) {
   const styles = createStyles(colors);
   const authUser = useQuery(api.users.current);
   const hasAppliedAuthName = useRef(false);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     loadProfile().then((p) => {
@@ -49,9 +50,28 @@ export default function ProfileContent({ onClose }: ProfileContentProps) {
     if (uri) setPhotoUri(uri);
   };
 
-  const handleNameBlur = () => {
-    saveProfileName(name.trim());
+  // Saves as-you-type (debounced) rather than only on blur — closing the
+  // drawer via the edge-swipe or a backdrop tap never fires a blur event,
+  // so relying on onBlur alone silently dropped whatever name was typed.
+  const handleNameChange = (next: string) => {
+    setName(next);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      saveProfileName(next.trim());
+    }, 400);
   };
+
+  // Belt-and-suspenders: also flush immediately on unmount/close so a
+  // fast type-then-close doesn't race the debounce timer.
+  useEffect(() => {
+    return () => {
+      if (saveTimer.current) {
+        clearTimeout(saveTimer.current);
+        saveProfileName(name.trim());
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- flush uses latest `name` at unmount time
+  }, []);
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
@@ -82,8 +102,7 @@ export default function ProfileContent({ onClose }: ProfileContentProps) {
         <TextInput
           style={styles.nameInput}
           value={name}
-          onChangeText={setName}
-          onBlur={handleNameBlur}
+          onChangeText={handleNameChange}
           placeholder="Your name"
           placeholderTextColor={colors.textMuted}
         />

@@ -112,11 +112,21 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" />
               <Stack.Screen
                 name="notes/index"
-                options={{ animation: "slide_from_right", gestureEnabled: true, gestureDirection: "horizontal" }}
+                options={{
+                  animation: "slide_from_right",
+                  gestureEnabled: true,
+                  gestureDirection: "horizontal",
+                  fullScreenGestureEnabled: true,
+                }}
               />
               <Stack.Screen
                 name="notes/[id]"
-                options={{ animation: "slide_from_right", gestureEnabled: true, gestureDirection: "horizontal" }}
+                options={{
+                  animation: "slide_from_right",
+                  gestureEnabled: true,
+                  gestureDirection: "horizontal",
+                  fullScreenGestureEnabled: true,
+                }}
               />
             </Stack>
           </AuthGate>

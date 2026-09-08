@@ -1,3 +1,4 @@
+import EdgeSwipeBack from "@/components/EdgeSwipeBack";
 import SwipeableRow from "@/components/SwipeableRow";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -65,6 +66,7 @@ export default function NotesListScreen() {
 
   return (
     <View style={styles.container}>
+      <EdgeSwipeBack />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
           <Ionicons name="chevron-back" size={26} color={colors.text} />

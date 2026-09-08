@@ -72,6 +72,14 @@ export default function SwipeableRow({
       renderRightActions={onSwipeDelete ? renderRightActions : undefined}
       leftThreshold={60}
       rightThreshold={60}
+      // Requires a clearer, more deliberate horizontal drag before a row
+      // swipe engages, and firmly resists being pulled past the action
+      // panel — this is what keeps an in-progress page-swipe (PagerView)
+      // from being mistaken for a row swipe, and vice versa.
+      activeOffsetX={[-18, 18]}
+      failOffsetY={[-10, 10]}
+      overshootFriction={8}
+      friction={1.5}
       onSwipeableOpen={(direction) => {
         if (direction === "left") onSwipeComplete?.();
         if (direction === "right") onSwipeDelete?.();

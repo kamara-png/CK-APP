@@ -5,27 +5,20 @@ import StreaksScreen from "@/components/screens/StreaksScreen";
 import TodosScreen from "@/components/screens/TodosScreen";
 import useTheme from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useCallback, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import PagerView from "react-native-pager-view";
 import Animated, {
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
 
 const TABS = [
-  { key: "todos", icon: "flash-outline" as const, activeIcon: "flash" as const },
-  { key: "streaks", icon: "flame-outline" as const, activeIcon: "flame" as const },
-  { key: "statistics", icon: "podium-outline" as const, activeIcon: "podium" as const },
+  { key: "todos", label: "Todos", icon: "flash-outline" as const, activeIcon: "flash" as const },
+  { key: "streaks", label: "Streaks", icon: "flame-outline" as const, activeIcon: "flame" as const },
+  { key: "statistics", label: "Stats", icon: "podium-outline" as const, activeIcon: "podium" as const },
 ];
-
-// How far in from the left edge a swipe has to start to count as "open the
-// drawer" rather than a normal page swipe. Mirrors iOS's own edge-swipe
-// hit zone for back gestures.
-const EDGE_ZONE_WIDTH = 36;
-const OPEN_DRAG_THRESHOLD = 50;
 
 export default function TabsIndex() {
   const { colors } = useTheme();
@@ -60,21 +53,6 @@ export default function TabsIndex() {
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
-  // Profile access lives only on the Todos/home tab (via the hamburger, or
-  // this edge swipe). Todos is always page 0, so there's no "previous page"
-  // for the pager to scroll to from there anyway — the edge is free to
-  // repurpose for revealing the drawer, exactly like Instagram's DMs swipe.
-  const edgeSwipe = Gesture.Pan()
-    .enabled(activeIndex === 0 && !drawerOpen)
-    .activeOffsetX(15)
-    .failOffsetY([-20, 20])
-    .onEnd((event) => {
-      "worklet";
-      if (event.translationX > OPEN_DRAG_THRESHOLD || event.velocityX > 600) {
-        runOnJS(openDrawer)();
-      }
-    });
-
   const styles = createStyles(colors);
 
   return (
@@ -97,17 +75,16 @@ export default function TabsIndex() {
         </View>
       </PagerView>
 
-      {activeIndex === 0 && (
-        <GestureDetector gesture={edgeSwipe}>
-          <View style={styles.edgeZone} pointerEvents="box-only" />
-        </GestureDetector>
-      )}
-
-      <View style={[styles.tabBar, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+      <LinearGradient
+        colors={[colors.surface + "00", colors.surface + "e6", colors.surface + "e6"]}
+        locations={[0, 0.35, 1]}
+        style={[styles.tabBar, { borderTopColor: colors.border + "80" }]}
+      >
         {TABS.map((tab, index) => (
           <TabBarIcon
             key={tab.key}
             index={index}
+            label={tab.label}
             icon={tab.icon}
             activeIcon={tab.activeIcon}
             scrollPosition={scrollPosition}
@@ -116,9 +93,15 @@ export default function TabsIndex() {
             onPress={() => goToPage(index)}
           />
         ))}
-      </View>
+      </LinearGradient>
 
-      <ProfileDrawer visible={drawerOpen} colors={colors} onClose={closeDrawer}>
+      <ProfileDrawer
+        visible={drawerOpen}
+        colors={colors}
+        onClose={closeDrawer}
+        onOpen={openDrawer}
+        edgeSwipeEnabled={activeIndex === 0}
+      >
         <ProfileContent onClose={closeDrawer} />
       </ProfileDrawer>
     </View>
@@ -127,6 +110,7 @@ export default function TabsIndex() {
 
 interface TabBarIconProps {
   index: number;
+  label: string;
   icon: keyof typeof Ionicons.glyphMap;
   activeIcon: keyof typeof Ionicons.glyphMap;
   scrollPosition: ReturnType<typeof useSharedValue<number>>;
@@ -137,6 +121,7 @@ interface TabBarIconProps {
 
 function TabBarIcon({
   index,
+  label,
   icon,
   activeIcon,
   scrollPosition,
@@ -165,16 +150,24 @@ function TabBarIcon({
     return { opacity: distance };
   });
 
+  const labelStyle = useAnimatedStyle(() => {
+    const distance = Math.min(1, Math.abs(scrollPosition.value - index));
+    return { opacity: 1 - distance * 0.7 };
+  });
+
   return (
     <TouchableOpacity style={iconStyles.tabButton} onPress={onPress} activeOpacity={0.7}>
       <Animated.View style={scaleStyle}>
         <Animated.View style={[iconStyles.iconLayer, activeStyle]}>
-          <Ionicons name={activeIcon} size={26} color={activeColor} />
+          <Ionicons name={activeIcon} size={24} color={activeColor} />
         </Animated.View>
         <Animated.View style={inactiveStyle}>
-          <Ionicons name={icon} size={26} color={inactiveColor} />
+          <Ionicons name={icon} size={24} color={inactiveColor} />
         </Animated.View>
       </Animated.View>
+      <Animated.Text style={[iconStyles.label, { color: activeColor }, labelStyle]}>
+        {label}
+      </Animated.Text>
     </TouchableOpacity>
   );
 }
@@ -184,27 +177,26 @@ const iconStyles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    gap: 2,
   },
   iconLayer: {
     position: "absolute",
+  },
+  label: {
+    fontSize: 11,
+    fontWeight: "600",
+    marginTop: 22,
   },
 });
 
 const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
   StyleSheet.create({
     flex: { flex: 1, backgroundColor: colors.bg },
-    edgeZone: {
-      position: "absolute",
-      left: 0,
-      top: 0,
-      bottom: 90,
-      width: EDGE_ZONE_WIDTH,
-    },
     tabBar: {
       flexDirection: "row",
       height: 90,
-      paddingBottom: 30,
-      paddingTop: 10,
-      borderTopWidth: 1,
+      paddingBottom: 26,
+      paddingTop: 14,
+      borderTopWidth: StyleSheet.hairlineWidth,
     },
   });
