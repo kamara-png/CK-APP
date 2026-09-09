@@ -18,6 +18,7 @@ export default defineSchema({
             v.literal("chime"),
             v.literal("silent")
         )),
+        imageId: v.optional(v.id("_storage")),
 }).index("by_user", ["userId"]),
     notes: defineTable({
         userId: v.id("users"),

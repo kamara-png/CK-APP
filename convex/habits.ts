@@ -133,3 +133,35 @@ export const clearAllHabits = mutation({
         return { deletedCount: habits.length };
     },
 });
+
+// Bulk-restores habits and their check-in history from an exported backup
+// file (the shape produced by getHabitsOverview).
+export const importHabits = mutation({
+    args: {
+        habits: v.array(v.object({
+            habit: v.object({
+                name: v.string(),
+                color: v.string(),
+                createdAt: v.optional(v.number()),
+            }),
+            dateKeys: v.array(v.string()),
+        })),
+    },
+    handler: async (ctx, args) => {
+        const userId = await requireUserId(ctx);
+        let imported = 0;
+        for (const entry of args.habits) {
+            const habitId = await ctx.db.insert("habits", {
+                userId,
+                name: entry.habit.name,
+                color: entry.habit.color,
+                createdAt: entry.habit.createdAt ?? Date.now(),
+            });
+            for (const dateKey of entry.dateKeys) {
+                await ctx.db.insert("habitCheckins", { habitId, dateKey });
+            }
+            imported++;
+        }
+        return { imported };
+    },
+});

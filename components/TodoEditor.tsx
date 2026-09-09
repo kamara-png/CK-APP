@@ -1,9 +1,23 @@
 import DateTimeField from "@/components/DateTimeField";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { ColorScheme } from "@/hooks/useTheme";
 import { ReminderSound } from "@/lib/notifications";
+import { uploadImageToConvex } from "@/lib/uploadImage";
 import { Ionicons } from "@expo/vector-icons";
+import { useMutation } from "convex/react";
+import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
-import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const SOUND_OPTIONS: { value: ReminderSound; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { value: "default", label: "Default", icon: "notifications" },
@@ -14,9 +28,11 @@ const SOUND_OPTIONS: { value: ReminderSound; label: string; icon: keyof typeof I
 
 interface TodoEditorProps {
   visible: boolean;
+  todoId: Id<"todos"> | null;
   initialText: string;
   initialReminderAt?: number;
   initialReminderSound?: ReminderSound;
+  initialImageUrl?: string | null;
   colors: ColorScheme;
   onSave: (text: string, reminderAt?: number, reminderSound?: ReminderSound) => void;
   onClose: () => void;
@@ -24,9 +40,11 @@ interface TodoEditorProps {
 
 export default function TodoEditor({
   visible,
+  todoId,
   initialText,
   initialReminderAt,
   initialReminderSound,
+  initialImageUrl,
   colors,
   onSave,
   onClose,
@@ -37,7 +55,11 @@ export default function TodoEditor({
     initialReminderAt ? new Date(initialReminderAt) : new Date(Date.now() + 60 * 60 * 1000)
   );
   const [sound, setSound] = useState<ReminderSound>(initialReminderSound ?? "default");
+  const [imageUrl, setImageUrl] = useState<string | null | undefined>(initialImageUrl);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const styles = createStyles(colors);
+  const generateUploadUrl = useMutation(api.todos.generateUploadUrl);
+  const setTodoImage = useMutation(api.todos.setTodoImage);
 
   useEffect(() => {
     if (visible) {
@@ -45,8 +67,38 @@ export default function TodoEditor({
       setReminderOn(Boolean(initialReminderAt));
       setDate(initialReminderAt ? new Date(initialReminderAt) : new Date(Date.now() + 60 * 60 * 1000));
       setSound(initialReminderSound ?? "default");
+      setImageUrl(initialImageUrl);
     }
-  }, [visible, initialText, initialReminderAt, initialReminderSound]);
+  }, [visible, initialText, initialReminderAt, initialReminderSound, initialImageUrl]);
+
+  const handlePickImage = async () => {
+    if (!todoId) return;
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) return;
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      quality: 0.7,
+      allowsEditing: true,
+    });
+    if (result.canceled || !result.assets?.[0]) return;
+
+    const uri = result.assets[0].uri;
+    setUploadingImage(true);
+    try {
+      const storageId = await uploadImageToConvex(uri, () => generateUploadUrl({}));
+      await setTodoImage({ id: todoId, imageId: storageId as Id<"_storage"> });
+      setImageUrl(uri);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    if (!todoId) return;
+    await setTodoImage({ id: todoId, imageId: null });
+    setImageUrl(null);
+  };
 
   const handleSave = () => {
     const trimmed = text.trim();
@@ -75,6 +127,28 @@ export default function TodoEditor({
             autoFocus
             multiline
           />
+
+          {imageUrl ? (
+            <View style={styles.imagePreviewWrap}>
+              <Image source={{ uri: imageUrl }} style={styles.imagePreview} />
+              {uploadingImage && (
+                <View style={styles.imageUploadingOverlay}>
+                  <ActivityIndicator color="#fff" />
+                </View>
+              )}
+              <TouchableOpacity style={styles.imageRemoveButton} onPress={handleRemoveImage}>
+                <Ionicons name="close" size={16} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.addImageButton} onPress={handlePickImage}>
+              <Ionicons name="image-outline" size={18} color={colors.primary} />
+              <Text style={[styles.addImageText, { color: colors.primary }]}>
+                {uploadingImage ? "Uploading…" : "Add a photo"}
+              </Text>
+            </TouchableOpacity>
+          )}
+
 
           <TouchableOpacity
             style={styles.reminderToggle}
@@ -187,6 +261,45 @@ const createStyles = (colors: ColorScheme) =>
       alignItems: "center",
       gap: 8,
       marginTop: 16,
+    },
+    addImageButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      marginTop: 12,
+      paddingVertical: 8,
+    },
+    addImageText: {
+      fontWeight: "600",
+      fontSize: 14,
+    },
+    imagePreviewWrap: {
+      marginTop: 12,
+      borderRadius: 12,
+      overflow: "hidden",
+      alignSelf: "flex-start",
+    },
+    imagePreview: {
+      width: 96,
+      height: 96,
+      borderRadius: 12,
+    },
+    imageUploadingOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: "rgba(0,0,0,0.4)",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    imageRemoveButton: {
+      position: "absolute",
+      top: 4,
+      right: 4,
+      backgroundColor: "rgba(0,0,0,0.55)",
+      borderRadius: 10,
+      width: 20,
+      height: 20,
+      alignItems: "center",
+      justifyContent: "center",
     },
     label: {
       fontSize: 13,

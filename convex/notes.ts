@@ -133,3 +133,30 @@ export const clearAllNotes = mutation({
         return { deletedCount: notes.length };
     },
 });
+
+// Bulk-restores notes from an exported backup file.
+export const importNotes = mutation({
+    args: {
+        notes: v.array(v.object({
+            title: v.string(),
+            content: v.string(),
+            updatedAt: v.optional(v.number()),
+            color: v.optional(v.string()),
+        })),
+    },
+    handler: async (ctx, args) => {
+        const userId = await requireUserId(ctx);
+        let imported = 0;
+        for (const note of args.notes) {
+            await ctx.db.insert("notes", {
+                userId,
+                title: note.title,
+                content: note.content,
+                color: note.color,
+                updatedAt: note.updatedAt ?? Date.now(),
+            });
+            imported++;
+        }
+        return { imported };
+    },
+});

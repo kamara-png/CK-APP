@@ -1,9 +1,16 @@
 import DateTimeField from "@/components/DateTimeField";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { ColorScheme } from "@/hooks/useTheme";
 import { ReminderSound } from "@/lib/notifications";
+import { uploadImageToConvex } from "@/lib/uploadImage";
 import { Ionicons } from "@expo/vector-icons";
+import { useMutation } from "convex/react";
+import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
+  ActivityIndicator,
+  Image,
   Modal,
   StyleSheet,
   Switch,
@@ -16,7 +23,12 @@ import {
 interface AddTodoModalProps {
   visible: boolean;
   colors: ColorScheme;
-  onSubmit: (text: string, reminderAt?: number, reminderSound?: ReminderSound) => void;
+  onSubmit: (
+    text: string,
+    reminderAt?: number,
+    reminderSound?: ReminderSound,
+    imageId?: Id<"_storage">
+  ) => void;
   onClose: () => void;
 }
 
@@ -26,7 +38,40 @@ export default function AddTodoModal({ visible, colors, onSubmit, onClose }: Add
   const [reminderDate, setReminderDate] = useState(
     () => new Date(Date.now() + 60 * 60 * 1000)
   );
+  const [imagePreviewUri, setImagePreviewUri] = useState<string | null>(null);
+  const [imageId, setImageId] = useState<Id<"_storage"> | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const generateUploadUrl = useMutation(api.todos.generateUploadUrl);
   const styles = createStyles(colors);
+
+  const handlePickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) return;
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      quality: 0.7,
+      allowsEditing: true,
+    });
+    if (result.canceled || !result.assets?.[0]) return;
+
+    const uri = result.assets[0].uri;
+    setImagePreviewUri(uri);
+    setUploadingImage(true);
+    try {
+      const id = await uploadImageToConvex(uri, () => generateUploadUrl({}));
+      setImageId(id as Id<"_storage">);
+    } catch {
+      setImagePreviewUri(null);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreviewUri(null);
+    setImageId(null);
+  };
 
   const handleSubmit = () => {
     const trimmed = text.trim();
@@ -35,10 +80,13 @@ export default function AddTodoModal({ visible, colors, onSubmit, onClose }: Add
     onSubmit(
       trimmed,
       reminderEnabled ? reminderDate.getTime() : undefined,
-      reminderEnabled ? "alarm" : undefined
+      reminderEnabled ? "alarm" : undefined,
+      imageId ?? undefined
     );
     setReminderEnabled(false);
     setReminderDate(new Date(Date.now() + 60 * 60 * 1000));
+    setImagePreviewUri(null);
+    setImageId(null);
   };
 
   return (
@@ -62,6 +110,26 @@ export default function AddTodoModal({ visible, colors, onSubmit, onClose }: Add
             multiline
             onSubmitEditing={handleSubmit}
           />
+
+          {imagePreviewUri ? (
+            <View style={styles.imagePreviewWrap}>
+              <Image source={{ uri: imagePreviewUri }} style={styles.imagePreview} />
+              {uploadingImage && (
+                <View style={styles.imageUploadingOverlay}>
+                  <ActivityIndicator color="#fff" />
+                </View>
+              )}
+              <TouchableOpacity style={styles.imageRemoveButton} onPress={handleRemoveImage}>
+                <Ionicons name="close" size={16} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.addImageButton} onPress={handlePickImage}>
+              <Ionicons name="image-outline" size={18} color={colors.primary} />
+              <Text style={[styles.addImageText, { color: colors.primary }]}>Add a photo</Text>
+            </TouchableOpacity>
+          )}
+
           <View style={styles.reminderRow}>
             <View style={styles.reminderLabelRow}>
               <Ionicons
@@ -146,6 +214,45 @@ const createStyles = (colors: ColorScheme) =>
       justifyContent: "space-between",
       marginTop: 16,
       marginBottom: 12,
+    },
+    addImageButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      marginTop: 12,
+      paddingVertical: 8,
+    },
+    addImageText: {
+      fontWeight: "600",
+      fontSize: 14,
+    },
+    imagePreviewWrap: {
+      marginTop: 12,
+      borderRadius: 12,
+      overflow: "hidden",
+      alignSelf: "flex-start",
+    },
+    imagePreview: {
+      width: 96,
+      height: 96,
+      borderRadius: 12,
+    },
+    imageUploadingOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: "rgba(0,0,0,0.4)",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    imageRemoveButton: {
+      position: "absolute",
+      top: 4,
+      right: 4,
+      backgroundColor: "rgba(0,0,0,0.55)",
+      borderRadius: 10,
+      width: 20,
+      height: 20,
+      alignItems: "center",
+      justifyContent: "center",
     },
     reminderLabelRow: {
       flexDirection: "row",

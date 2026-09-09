@@ -5,7 +5,7 @@ import StreaksScreen from "@/components/screens/StreaksScreen";
 import TodosScreen from "@/components/screens/TodosScreen";
 import useTheme from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
 import { useCallback, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import PagerView from "react-native-pager-view";
@@ -75,11 +75,13 @@ export default function TabsIndex() {
         </View>
       </PagerView>
 
-      <LinearGradient
-        colors={[colors.surface + "00", colors.surface + "e6", colors.surface + "e6"]}
-        locations={[0, 0.35, 1]}
-        style={[styles.tabBar, { borderTopColor: colors.border + "80" }]}
+      <BlurView
+        intensity={70}
+        tint={colors.isDark ? "dark" : "light"}
+        experimentalBlurMethod="dimezisBlurView"
+        style={[styles.tabBar, { borderTopColor: colors.border + "33" }]}
       >
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.surface + "26" }]} />
         {TABS.map((tab, index) => (
           <TabBarIcon
             key={tab.key}
@@ -93,7 +95,7 @@ export default function TabsIndex() {
             onPress={() => goToPage(index)}
           />
         ))}
-      </LinearGradient>
+      </BlurView>
 
       <ProfileDrawer
         visible={drawerOpen}
@@ -198,5 +200,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       paddingBottom: 26,
       paddingTop: 14,
       borderTopWidth: StyleSheet.hairlineWidth,
+      overflow: "hidden",
     },
   });

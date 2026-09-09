@@ -23,12 +23,12 @@ function friendlyError(err: unknown): string {
   }
   const message = err instanceof Error ? err.message : String(err);
   if (message.toLowerCase().includes("invalidsecret") || message.toLowerCase().includes("invalid password")) {
-    return "That email and password don't match mzee.";
+    return "That email and password don't match.";
   }
   if (message.toLowerCase().includes("already") || message.toLowerCase().includes("exists")) {
-    return "An account with that email already exists, try signing in instead.";
+    return "An account with that email already exists — try signing in instead.";
   }
-  return "Something went wrong. Please try again mabadae.";
+  return "Something went wrong. Please try again.";
 }
 
 export default function SignInScreen() {
@@ -74,22 +74,18 @@ export default function SignInScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={styles.header}>
-        <View style={[styles.logoBadge, { backgroundColor: colors.primary }]}>
-          <Ionicons name="logo-xbox" size={30} color="#fff" />
-        </View>
-        <Text style={styles.title}>TENDO</Text>
-        <Text style={styles.subtitle}>
-          {flow === "signIn" ? "In latin Tendo means to aim ." : "In Swahili Tendo means to do"}
+        <Text style={styles.title}>
+          {flow === "signIn" ? "Welcome back" : "Create your account"}
         </Text>
         <Text style={styles.subtitle}>
-          {flow === "signIn" ? "Welcome back boss." : "Let's get you started."}
+          {flow === "signIn" ? "Sign in to continue." : "Let's get you set up."}
         </Text>
       </View>
 
       <View style={styles.form}>
         {flow === "signUp" && (
           <View style={styles.inputRow}>
-            <Ionicons name="person" size={18} color={colors.textMuted} />
+            <Ionicons name="person-outline" size={18} color={colors.textMuted} />
             <TextInput
               style={styles.input}
               value={name}
@@ -102,12 +98,12 @@ export default function SignInScreen() {
         )}
 
         <View style={styles.inputRow}>
-          <Ionicons name="mail" size={18} color={colors.textMuted} />
+          <Ionicons name="mail-outline" size={18} color={colors.textMuted} />
           <TextInput
             style={styles.input}
             value={email}
             onChangeText={setEmail}
-            placeholder="Email Address"
+            placeholder="Email"
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             keyboardType="email-address"
@@ -116,12 +112,12 @@ export default function SignInScreen() {
         </View>
 
         <View style={styles.inputRow}>
-          <Ionicons name="lock-closed" size={18} color={colors.textMuted} />
+          <Ionicons name="lock-closed-outline" size={18} color={colors.textMuted} />
           <TextInput
             style={styles.input}
             value={password}
             onChangeText={setPassword}
-            placeholder="Password (min 8 char)"
+            placeholder="Password (min 8 characters)"
             placeholderTextColor={colors.textMuted}
             secureTextEntry={!showPassword}
             autoComplete="password"
@@ -131,7 +127,7 @@ export default function SignInScreen() {
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Ionicons
-              name={showPassword ? "eye-off" : "eye"}
+              name={showPassword ? "eye-off-outline" : "eye-outline"}
               size={18}
               color={colors.textMuted}
             />
@@ -167,7 +163,7 @@ export default function SignInScreen() {
           <Text style={styles.switchFlowText}>
             {flow === "signIn"
               ? "Don't have an account? "
-              : "Sharp of you for having an account"}
+              : "Already have an account? "}
             <Text style={{ color: colors.primary, fontWeight: "700" }}>
               {flow === "signIn" ? "Sign up" : "Sign in"}
             </Text>
@@ -188,14 +184,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     header: {
       alignItems: "center",
       marginBottom: 36,
-    },
-    logoBadge: {
-      width: 64,
-      height: 64,
-      borderRadius: 20,
-      alignItems: "center",
-      justifyContent: "center",
-      marginBottom: 16,
     },
     title: {
       fontSize: 30,

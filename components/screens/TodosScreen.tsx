@@ -22,6 +22,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -87,10 +88,11 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
   const handleCreate = async (
     text: string,
     reminderAt?: number,
-    reminderSound?: ReminderSound
+    reminderSound?: ReminderSound,
+    imageId?: Id<"_storage">
   ) => {
     setAddModalOpen(false);
-    const todoId = await addTodo({ text, reminderAt, reminderSound });
+    const todoId = await addTodo({ text, reminderAt, reminderSound, imageId });
 
     if (reminderAt && reminderSound) {
       if (reminderAt <= Date.now()) {
@@ -252,6 +254,9 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
                           >
                             {item.text}
                           </Text>
+                          {item.imageUrl && (
+                            <Image source={{ uri: item.imageUrl }} style={styles.rowThumbnail} />
+                          )}
                           {item.reminderAt && (
                             <View style={styles.reminderChip}>
                               <Ionicons name="alarm" size={12} color={colors.primary} />
@@ -321,9 +326,11 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
 
       <TodoEditor
         visible={editTarget !== null}
+        todoId={editTarget}
         initialText={editingTodo?.text ?? ""}
         initialReminderAt={editingTodo?.reminderAt}
         initialReminderSound={editingTodo?.reminderSound as ReminderSound | undefined}
+        initialImageUrl={editingTodo?.imageUrl}
         colors={colors}
         onSave={handleSaveEdit}
         onClose={() => setEditTarget(null)}
@@ -411,6 +418,12 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     rowTextDone: {
       textDecorationLine: "line-through",
       color: colors.textMuted,
+    },
+    rowThumbnail: {
+      width: 64,
+      height: 64,
+      borderRadius: 10,
+      marginTop: 8,
     },
     reminderChip: {
       flexDirection: "row",
