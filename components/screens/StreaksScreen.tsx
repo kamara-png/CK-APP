@@ -56,7 +56,7 @@ export default function StreaksScreen() {
         <FlatList
           data={overview}
           keyExtractor={({ habit }) => habit._id}
-          contentContainerStyle={{ paddingBottom: 24 }}
+          contentContainerStyle={{ paddingBottom: 180 }}
           ListEmptyComponent={
             <Text style={styles.empty}>
               No streaks yet — tap + to start tracking something daily.

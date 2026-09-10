@@ -206,7 +206,7 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
     <>
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={onMenuPress} style={styles.headerAction}>
+          <TouchableOpacity onPress={onMenuPress} activeOpacity={0.6} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} style={styles.headerAction}>
             <Ionicons name="menu" size={30} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.title}>To-dos</Text>
@@ -435,7 +435,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       alignItems: "center",
       marginBottom: 16,
     },
-    headerAction: { width: 30 },
+    headerAction: { width: 44, height: 44, alignItems: "center", justifyContent: "center", marginLeft: -6 },
     title: {
       fontSize: 30,
       fontWeight: "900",
@@ -460,7 +460,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       color: colors.text,
     },
     list: {
-      paddingBottom: 100,
+      paddingBottom: 180,
     },
     dateHeader: {
       color: colors.textMuted,

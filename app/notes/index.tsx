@@ -215,7 +215,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       fontSize: 11,
       marginTop: 8,
     },
-    list: { paddingBottom: 104 },
+    list: { paddingBottom: 180 },
     fab: {
       position: "absolute",
       right: 20,

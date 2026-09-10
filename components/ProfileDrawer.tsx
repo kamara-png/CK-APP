@@ -14,7 +14,7 @@ const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const DRAWER_WIDTH = Math.min(360, SCREEN_WIDTH * 0.88);
-const EDGE_ZONE_WIDTH = 36;
+const EDGE_ZONE_WIDTH = 44;
 const OPEN_SPRING = { damping: 22, stiffness: 220, mass: 0.8 };
 const CLOSE_SPRING = { damping: 24, stiffness: 220, mass: 0.8 };
 
