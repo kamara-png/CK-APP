@@ -59,7 +59,9 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
   const [search, setSearch] = useState("");
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Id<"todos"> | null>(null);
-  const [pendingDeleteId, setPendingDeleteId] = useState<Id<"todos"> | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<Id<"todos"> | null>(
+    null,
+  );
   const deleteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const todos = useQuery(api.todos.getTodos);
@@ -70,7 +72,9 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
   const setReminder = useMutation(api.todos.setReminder);
   const slowLoading = useSlowLoadingHint(todos === undefined);
 
-  const [reminderTarget, setReminderTarget] = useState<ReminderTarget | null>(null);
+  const [reminderTarget, setReminderTarget] = useState<ReminderTarget | null>(
+    null,
+  );
 
   useEffect(() => {
     return () => {
@@ -81,7 +85,9 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
   const visibleTodos = useMemo(() => {
     if (!todos) return [];
     const q = search.trim().toLowerCase();
-    const base = q ? todos.filter((t) => t.text.toLowerCase().includes(q)) : todos;
+    const base = q
+      ? todos.filter((t) => t.text.toLowerCase().includes(q))
+      : todos;
     return base.filter((t) => t._id !== pendingDeleteId);
   }, [todos, search, pendingDeleteId]);
 
@@ -89,24 +95,32 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
     text: string,
     reminderAt?: number,
     reminderSound?: ReminderSound,
-    imageId?: Id<"_storage">
+    imageId?: Id<"_storage">,
   ) => {
     setAddModalOpen(false);
     const todoId = await addTodo({ text, reminderAt, reminderSound, imageId });
 
     if (reminderAt && reminderSound) {
       if (reminderAt <= Date.now()) {
-        Alert.alert("Choose a future time", "The alarm time must be later than now.");
+        Alert.alert(
+          "Choose a future time",
+          "The alarm time must be later than now.",
+        );
         return;
       }
 
       const granted = await ensureNotificationPermission();
       if (granted) {
-        await scheduleTodoReminder(todoId, text, new Date(reminderAt), reminderSound);
+        await scheduleTodoReminder(
+          todoId,
+          text,
+          new Date(reminderAt),
+          reminderSound,
+        );
       } else {
         Alert.alert(
           "Notifications are off",
-          "The task was added, but your alarm could not be scheduled without notification permission."
+          "The task was added, but your alarm could not be scheduled without notification permission.",
         );
       }
     }
@@ -116,16 +130,29 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
     if (!reminderTarget) return;
     const granted = await ensureNotificationPermission();
     const todo = todos?.find((t) => t._id === reminderTarget.id);
-    await setReminder({ id: reminderTarget.id, reminderAt: date.getTime(), reminderSound: sound });
+    await setReminder({
+      id: reminderTarget.id,
+      reminderAt: date.getTime(),
+      reminderSound: sound,
+    });
     if (granted) {
-      await scheduleTodoReminder(reminderTarget.id, todo?.text ?? "Todo reminder", date, sound);
+      await scheduleTodoReminder(
+        reminderTarget.id,
+        todo?.text ?? "Todo reminder",
+        date,
+        sound,
+      );
     }
     setReminderTarget(null);
   };
 
   const handleClearReminder = async () => {
     if (!reminderTarget) return;
-    await setReminder({ id: reminderTarget.id, reminderAt: undefined, reminderSound: undefined });
+    await setReminder({
+      id: reminderTarget.id,
+      reminderAt: undefined,
+      reminderSound: undefined,
+    });
     await cancelTodoReminder(reminderTarget.id);
     setReminderTarget(null);
   };
@@ -150,14 +177,20 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
   const handleSaveEdit = async (
     text: string,
     reminderAt?: number,
-    reminderSound?: ReminderSound
+    reminderSound?: ReminderSound,
   ) => {
     if (!editTarget) return;
     await updateTodo({ id: editTarget, text });
     await setReminder({ id: editTarget, reminderAt, reminderSound });
     if (reminderAt && reminderSound) {
       const granted = await ensureNotificationPermission();
-      if (granted) await scheduleTodoReminder(editTarget, text, new Date(reminderAt), reminderSound);
+      if (granted)
+        await scheduleTodoReminder(
+          editTarget,
+          text,
+          new Date(reminderAt),
+          reminderSound,
+        );
     } else {
       await cancelTodoReminder(editTarget);
     }
@@ -165,7 +198,9 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
   };
 
   const styles = createStyles(colors);
-  const editingTodo = editTarget ? todos?.find((t) => t._id === editTarget) : undefined;
+  const editingTodo = editTarget
+    ? todos?.find((t) => t._id === editTarget)
+    : undefined;
 
   return (
     <>
@@ -208,17 +243,26 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
             contentContainerStyle={styles.list}
             ListEmptyComponent={
               <Text style={styles.empty}>
-                {todos.length === 0 ? "No todos yet , tap + to add moja tu." : "hakuna match."}
+                {todos.length === 0
+                  ? "No todos yet , tap + to add moja tu."
+                  : "hakuna match."}
               </Text>
             }
             renderItem={({ item, index }) => {
               const prev = visibleTodos[index - 1];
-              const showDateHeader = !prev || dayKey(prev._creationTime) !== dayKey(item._creationTime);
+              const showDateHeader =
+                !prev ||
+                dayKey(prev._creationTime) !== dayKey(item._creationTime);
 
               return (
                 <View>
                   {showDateHeader && (
-                    <Text style={[styles.dateHeader, index > 0 && { marginTop: 20 }]}>
+                    <Text
+                      style={[
+                        styles.dateHeader,
+                        index > 0 && { marginTop: 20 },
+                      ]}
+                    >
                       {dayLabel(item._creationTime)}
                     </Text>
                   )}
@@ -226,47 +270,73 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
                     style={{ marginBottom: 8 }}
                     completeColor={colors.success}
                     deleteColor={colors.danger}
-                    onSwipeComplete={() => toggleTodo({ id: item._id as Id<"todos"> })}
-                    onSwipeDelete={() => handleSwipeOrIconDelete(item._id as Id<"todos">)}
+                    onSwipeComplete={() =>
+                      toggleTodo({ id: item._id as Id<"todos"> })
+                    }
+                    onSwipeDelete={() =>
+                      handleSwipeOrIconDelete(item._id as Id<"todos">)
+                    }
                   >
                     <View style={styles.row}>
                       <TouchableOpacity
                         style={styles.rowLeft}
-                        onPress={() => toggleTodo({ id: item._id as Id<"todos"> })}
+                        onPress={() =>
+                          toggleTodo({ id: item._id as Id<"todos"> })
+                        }
                       >
                         <BouncyIcon active={item.iscompleted}>
                           <View
                             style={[
                               styles.checkbox,
                               item.iscompleted
-                                ? { backgroundColor: colors.success, borderColor: colors.success }
+                                ? {
+                                    backgroundColor: colors.success,
+                                    borderColor: colors.success,
+                                  }
                                 : { borderColor: colors.textMuted },
                             ]}
                           >
                             {item.iscompleted && (
-                              <Ionicons name="checkmark" size={20} color="#fff" />
+                              <Ionicons
+                                name="checkmark"
+                                size={20}
+                                color="#fff"
+                              />
                             )}
                           </View>
                         </BouncyIcon>
                         <View style={{ flex: 1 }}>
                           <Text
-                            style={[styles.rowText, item.iscompleted && styles.rowTextDone]}
+                            style={[
+                              styles.rowText,
+                              item.iscompleted && styles.rowTextDone,
+                            ]}
                           >
                             {item.text}
                           </Text>
                           {item.imageUrl && (
-                            <Image source={{ uri: item.imageUrl }} style={styles.rowThumbnail} />
+                            <Image
+                              source={{ uri: item.imageUrl }}
+                              style={styles.rowThumbnail}
+                            />
                           )}
                           {item.reminderAt && (
                             <View style={styles.reminderChip}>
-                              <Ionicons name="alarm" size={12} color={colors.primary} />
+                              <Ionicons
+                                name="alarm"
+                                size={12}
+                                color={colors.primary}
+                              />
                               <Text style={styles.reminderChipText}>
-                                {new Date(item.reminderAt).toLocaleString(undefined, {
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "numeric",
-                                  minute: "2-digit",
-                                })}
+                                {new Date(item.reminderAt).toLocaleString(
+                                  undefined,
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                  },
+                                )}
                               </Text>
                             </View>
                           )}
@@ -276,12 +346,22 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
                         onPress={() => setEditTarget(item._id as Id<"todos">)}
                         style={{ paddingHorizontal: 6 }}
                       >
-                        <Ionicons name="color-wand" size={18} color={colors.textMuted} />
+                        <Ionicons
+                          name="color-wand"
+                          size={18}
+                          color={colors.textMuted}
+                        />
                       </TouchableOpacity>
                       <TouchableOpacity
-                        onPress={() => handleSwipeOrIconDelete(item._id as Id<"todos">)}
+                        onPress={() =>
+                          handleSwipeOrIconDelete(item._id as Id<"todos">)
+                        }
                       >
-                        <Ionicons name="trash" size={20} color={colors.danger} />
+                        <Ionicons
+                          name="trash"
+                          size={20}
+                          color={colors.danger}
+                        />
                       </TouchableOpacity>
                     </View>
                   </SwipeableRow>
@@ -329,7 +409,9 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
         todoId={editTarget}
         initialText={editingTodo?.text ?? ""}
         initialReminderAt={editingTodo?.reminderAt}
-        initialReminderSound={editingTodo?.reminderSound as ReminderSound | undefined}
+        initialReminderSound={
+          editingTodo?.reminderSound as ReminderSound | undefined
+        }
         initialImageUrl={editingTodo?.imageUrl}
         colors={colors}
         onSave={handleSaveEdit}
@@ -452,7 +534,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     fab: {
       position: "absolute",
       right: 20,
-      bottom: 30,
+      bottom: 108, // was 30 — clears floating tab bar
       width: 58,
       height: 58,
       borderRadius: 18,
@@ -463,5 +545,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       shadowOffset: { width: 0, height: 3 },
       shadowOpacity: 0.3,
       shadowRadius: 5,
+      zIndex: 20,
     },
   });

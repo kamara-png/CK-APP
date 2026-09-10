@@ -28,16 +28,21 @@ interface AddTodoModalProps {
     text: string,
     reminderAt?: number,
     reminderSound?: ReminderSound,
-    imageId?: Id<"_storage">
+    imageId?: Id<"_storage">,
   ) => void;
   onClose: () => void;
 }
 
-export default function AddTodoModal({ visible, colors, onSubmit, onClose }: AddTodoModalProps) {
+export default function AddTodoModal({
+  visible,
+  colors,
+  onSubmit,
+  onClose,
+}: AddTodoModalProps) {
   const [text, setText] = useState("");
   const [reminderEnabled, setReminderEnabled] = useState(false);
   const [reminderDate, setReminderDate] = useState(
-    () => new Date(Date.now() + 60 * 60 * 1000)
+    () => new Date(Date.now() + 60 * 60 * 1000),
   );
   const [imagePreviewUri, setImagePreviewUri] = useState<string | null>(null);
   const [imageId, setImageId] = useState<Id<"_storage"> | null>(null);
@@ -82,7 +87,7 @@ export default function AddTodoModal({ visible, colors, onSubmit, onClose }: Add
       trimmed,
       reminderEnabled ? reminderDate.getTime() : undefined,
       reminderEnabled ? "alarm" : undefined,
-      imageId ?? undefined
+      imageId ?? undefined,
     );
     setReminderEnabled(false);
     setReminderDate(new Date(Date.now() + 60 * 60 * 1000));
@@ -91,7 +96,12 @@ export default function AddTodoModal({ visible, colors, onSubmit, onClose }: Add
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
       <BlurView intensity={45} tint="dark" style={styles.backdrop}>
         <View style={styles.card}>
           <View style={styles.header}>
@@ -114,20 +124,31 @@ export default function AddTodoModal({ visible, colors, onSubmit, onClose }: Add
 
           {imagePreviewUri ? (
             <View style={styles.imagePreviewWrap}>
-              <Image source={{ uri: imagePreviewUri }} style={styles.imagePreview} />
+              <Image
+                source={{ uri: imagePreviewUri }}
+                style={styles.imagePreview}
+              />
               {uploadingImage && (
                 <View style={styles.imageUploadingOverlay}>
                   <ActivityIndicator color="#fff" />
                 </View>
               )}
-              <TouchableOpacity style={styles.imageRemoveButton} onPress={handleRemoveImage}>
+              <TouchableOpacity
+                style={styles.imageRemoveButton}
+                onPress={handleRemoveImage}
+              >
                 <Ionicons name="close" size={16} color="#fff" />
               </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity style={styles.addImageButton} onPress={handlePickImage}>
-              <Ionicons name="image-outline" size={18} color={colors.primary} />
-              <Text style={[styles.addImageText, { color: colors.primary }]}>Add a photo</Text>
+            <TouchableOpacity
+              style={styles.addImageButton}
+              onPress={handlePickImage}
+            >
+              <Ionicons name="image" size={18} color={colors.primary} />
+              <Text style={[styles.addImageText, { color: colors.primary }]}>
+                Add a photo to remind you
+              </Text>
             </TouchableOpacity>
           )}
 
@@ -140,7 +161,9 @@ export default function AddTodoModal({ visible, colors, onSubmit, onClose }: Add
               />
               <View>
                 <Text style={styles.reminderTitle}>Set an alarm</Text>
-                <Text style={styles.reminderHint}>Get notified when it is time</Text>
+                <Text style={styles.reminderHint}>
+                  Get notified when it is time to do this task
+                </Text>
               </View>
             </View>
             <Switch
@@ -234,8 +257,8 @@ const createStyles = (colors: ColorScheme) =>
       alignSelf: "flex-start",
     },
     imagePreview: {
-      width: 96,
-      height: 96,
+      width: 90,
+      height: 90,
       borderRadius: 12,
     },
     imageUploadingOverlay: {
