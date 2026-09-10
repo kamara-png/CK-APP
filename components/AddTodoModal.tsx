@@ -6,6 +6,7 @@ import { ReminderSound } from "@/lib/notifications";
 import { uploadImageToConvex } from "@/lib/uploadImage";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "convex/react";
+import { BlurView } from "expo-blur";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
@@ -91,7 +92,7 @@ export default function AddTodoModal({ visible, colors, onSubmit, onClose }: Add
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+      <BlurView intensity={45} tint="dark" style={styles.backdrop}>
         <View style={styles.card}>
           <View style={styles.header}>
             <View style={styles.headerSide} />
@@ -165,7 +166,7 @@ export default function AddTodoModal({ visible, colors, onSubmit, onClose }: Add
             <Text style={styles.buttonText}>Add todo bossi</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </BlurView>
     </Modal>
   );
 }
@@ -174,7 +175,7 @@ const createStyles = (colors: ColorScheme) =>
   StyleSheet.create({
     backdrop: {
       flex: 1,
-      backgroundColor: "rgba(0,0,0,0.5)",
+      backgroundColor: "rgba(0,0,0,0.25)",
       justifyContent: "center",
       padding: 24,
     },

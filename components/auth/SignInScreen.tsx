@@ -5,6 +5,7 @@ import { ConvexError } from "convex/values";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -74,6 +75,15 @@ export default function SignInScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={styles.header}>
+        <Image
+          source={
+            colors.isDark
+              ? require("@/assets/images/logo-mark-dark.png")
+              : require("@/assets/images/logo-mark.png")
+          }
+          style={styles.logo}
+          resizeMode="contain"
+        />
         <Text style={styles.title}>
           {flow === "signIn" ? "Welcome back" : "Create your account"}
         </Text>
@@ -184,6 +194,11 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     header: {
       alignItems: "center",
       marginBottom: 36,
+    },
+    logo: {
+      width: 110,
+      height: 88,
+      marginBottom: 12,
     },
     title: {
       fontSize: 30,

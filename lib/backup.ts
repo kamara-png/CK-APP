@@ -19,7 +19,7 @@ export async function exportAllData(todos: unknown, notes: unknown, habits: unkn
 
   const json = JSON.stringify(backup, null, 2);
   const dateStamp = new Date().toISOString().slice(0, 10);
-  const file = new File(Paths.cache, `ck-app-backup-${dateStamp}.json`);
+  const file = new File(Paths.cache, `tendo-backup-${dateStamp}.json`);
   if (file.exists) file.delete();
   file.write(json);
 
@@ -27,7 +27,7 @@ export async function exportAllData(todos: unknown, notes: unknown, habits: unkn
   if (canShare) {
     await Sharing.shareAsync(file.uri, {
       mimeType: "application/json",
-      dialogTitle: "Save your CK-APP backup",
+      dialogTitle: "Save your Tendo backup",
     });
   }
 
@@ -69,7 +69,7 @@ export async function pickBackupFile(): Promise<ParsedBackup | null> {
     !("notes" in parsed) ||
     !("habits" in parsed)
   ) {
-    throw new Error("That doesn't look like a CK-APP backup file.");
+    throw new Error("That doesn't look like a Tendo backup file.");
   }
 
   const data = parsed as Record<string, unknown>;

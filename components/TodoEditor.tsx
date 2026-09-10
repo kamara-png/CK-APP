@@ -6,6 +6,7 @@ import { ReminderSound } from "@/lib/notifications";
 import { uploadImageToConvex } from "@/lib/uploadImage";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "convex/react";
+import { BlurView } from "expo-blur";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
 import {
@@ -108,7 +109,7 @@ export default function TodoEditor({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+      <BlurView intensity={45} tint="dark" style={styles.backdrop}>
         <View style={styles.card}>
           <View style={styles.header}>
             <View style={styles.headerSide} />
@@ -213,7 +214,7 @@ export default function TodoEditor({
             <Text style={styles.saveButtonText}>Save changes</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </BlurView>
     </Modal>
   );
 }
@@ -222,7 +223,7 @@ const createStyles = (colors: ColorScheme) =>
   StyleSheet.create({
     backdrop: {
       flex: 1,
-      backgroundColor: "rgba(0,0,0,0.5)",
+      backgroundColor: "rgba(0,0,0,0.25)",
       justifyContent: "center",
       padding: 24,
     },

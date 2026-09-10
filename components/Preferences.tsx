@@ -1,6 +1,7 @@
 import { createSettingsStyles } from "@/assets/styles/settings.styles";
 import useTheme, { ACCENT_OPTIONS, ThemeAccent } from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 import { useState } from "react";
 import { FlatList, Modal, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 
@@ -73,6 +74,7 @@ const Preferences = () => {
           activeOpacity={1}
           onPress={() => setPickerOpen(false)}
         >
+          <BlurView intensity={45} tint="dark" style={StyleSheet.absoluteFill} pointerEvents="none" />
           <TouchableOpacity activeOpacity={1} style={styles.sheet}>
             <View style={styles.sheetHandle} />
             <Text style={styles.sheetTitle}>Color theme</Text>
@@ -130,7 +132,7 @@ const createLocalStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     },
     backdrop: {
       flex: 1,
-      backgroundColor: "rgba(0,0,0,0.5)",
+      backgroundColor: "rgba(0,0,0,0.2)",
       justifyContent: "flex-end",
     },
     sheet: {

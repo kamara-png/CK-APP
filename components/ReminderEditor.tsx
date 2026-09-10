@@ -2,6 +2,7 @@ import DateTimeField from "@/components/DateTimeField";
 import { ColorScheme } from "@/hooks/useTheme";
 import { ReminderSound } from "@/lib/notifications";
 import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 import { useState } from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -39,7 +40,7 @@ export default function ReminderEditor({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+      <BlurView intensity={45} tint="dark" style={styles.backdrop}>
         <View style={styles.card}>
           <View style={styles.header}>
             <View style={styles.headerSide} />
@@ -109,7 +110,7 @@ export default function ReminderEditor({
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </BlurView>
     </Modal>
   );
 }
@@ -118,7 +119,7 @@ const createStyles = (colors: ColorScheme) =>
   StyleSheet.create({
     backdrop: {
       flex: 1,
-      backgroundColor: "rgba(0,0,0,0.5)",
+      backgroundColor: "rgba(0,0,0,0.25)",
       justifyContent: "center",
       padding: 24,
     },

@@ -17,6 +17,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Animated, { SlideInRight, SlideOutRight } from "react-native-reanimated";
 
 function timeAgo(ms: number) {
   const diff = Date.now() - ms;
@@ -65,7 +66,11 @@ export default function NotesListScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <Animated.View
+      style={styles.container}
+      entering={SlideInRight.duration(280)}
+      exiting={SlideOutRight.duration(220)}
+    >
       <EdgeSwipeBack />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
@@ -137,7 +142,7 @@ export default function NotesListScreen() {
       >
         <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
-    </View>
+    </Animated.View>
   );
 }
 

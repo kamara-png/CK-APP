@@ -7,6 +7,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import useTheme from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { useConvex, useMutation, useQuery } from "convex/react";
+import { BlurView } from "expo-blur";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -23,6 +24,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import Animated, { SlideInRight, SlideOutRight } from "react-native-reanimated";
 
 const AUTOSAVE_DELAY_MS = 600;
 const NOTE_COLORS = [null, "#ef4444", "#f97316", "#f59e0b", "#84cc16", "#10b981", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899"];
@@ -209,6 +211,11 @@ export default function NoteEditorScreen() {
   }
 
   return (
+    <Animated.View
+      style={{ flex: 1 }}
+      entering={SlideInRight.duration(280)}
+      exiting={SlideOutRight.duration(220)}
+    >
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <EdgeSwipeBack />
       <View style={styles.container}>
@@ -320,6 +327,7 @@ export default function NoteEditorScreen() {
 
       <Modal visible={optionsOpen} transparent animationType="slide" onRequestClose={() => setOptionsOpen(false)}>
         <TouchableOpacity style={styles.pickerBackdrop} activeOpacity={1} onPress={() => setOptionsOpen(false)}>
+          <BlurView intensity={45} tint="dark" style={StyleSheet.absoluteFill} pointerEvents="none" />
           <TouchableOpacity activeOpacity={1} style={styles.optionsSheet}>
             <View style={styles.sheetHandle} />
             <Text style={styles.pickerTitle}>Note Options</Text>
@@ -378,7 +386,7 @@ export default function NoteEditorScreen() {
       </Modal>
 
       <Modal visible={customPickerOpen} transparent animationType="fade" onRequestClose={() => setCustomPickerOpen(false)}>
-        <View style={styles.pickerBackdrop}>
+        <BlurView intensity={45} tint="dark" style={styles.pickerBackdrop}>
           <View style={styles.pickerCard}>
             <View style={styles.pickerHeader}>
               <View style={styles.pickerHeaderSide} />
@@ -402,9 +410,10 @@ export default function NoteEditorScreen() {
               <Text style={styles.doneButtonText}>Done</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </BlurView>
       </Modal>
     </KeyboardAvoidingView>
+    </Animated.View>
   );
 }
 
@@ -525,7 +534,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     },
     pickerBackdrop: {
       flex: 1,
-      backgroundColor: "rgba(0,0,0,0.5)",
+      backgroundColor: "rgba(0,0,0,0.2)",
       justifyContent: "center",
       padding: 24,
     },

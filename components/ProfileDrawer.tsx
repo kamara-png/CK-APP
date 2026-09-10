@@ -1,4 +1,5 @@
 import { ColorScheme } from "@/hooks/useTheme";
+import { BlurView } from "expo-blur";
 import { useEffect } from "react";
 import { Dimensions, Pressable, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -8,6 +9,8 @@ import Animated, {
     useSharedValue,
     withSpring
 } from "react-native-reanimated";
+
+const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const DRAWER_WIDTH = Math.min(360, SCREEN_WIDTH * 0.88);
@@ -108,12 +111,14 @@ export default function ProfileDrawer({
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-      <Animated.View
+      <AnimatedBlurView
         pointerEvents={visible ? "auto" : "none"}
+        intensity={50}
+        tint={colors.isDark ? "dark" : "light"}
         style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]}
       >
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-      </Animated.View>
+      </AnimatedBlurView>
 
       {edgeSwipeEnabled && !visible && (
         <GestureDetector gesture={edgePan}>
@@ -139,7 +144,7 @@ export default function ProfileDrawer({
 
 const styles = StyleSheet.create({
   backdrop: {
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.2)",
   },
   edgeZone: {
     position: "absolute",
