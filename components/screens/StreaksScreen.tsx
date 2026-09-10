@@ -4,7 +4,11 @@ import SwipeableRow from "@/components/SwipeableRow";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import useTheme from "@/hooks/useTheme";
-import { computeStreakStats, getLast7Days, getLocalDateKey } from "@/lib/streaks";
+import {
+  computeStreakStats,
+  getLast7Days,
+  getLocalDateKey,
+} from "@/lib/streaks";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
@@ -39,121 +43,156 @@ export default function StreaksScreen() {
   const handleDelete = (id: Id<"habits">, name: string) => {
     Alert.alert(`Delete "${name}"?`, "This removes all your progress man.", [
       { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: () => deleteHabit({ id }) },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => deleteHabit({ id }),
+      },
     ]);
   };
 
   return (
     <>
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Streaks</Text>
-      </View>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Streaks</Text>
+        </View>
 
-      {overview === undefined ? (
-        <ActivityIndicator style={{ marginTop: 24 }} color={colors.primary} />
-      ) : (
-        <FlatList
-          data={overview}
-          keyExtractor={({ habit }) => habit._id}
-          contentContainerStyle={{ paddingBottom: 180 }}
-          ListEmptyComponent={
-            <Text style={styles.empty}>
-              No streaks yet — tap + to start tracking something daily.
-            </Text>
-          }
-          renderItem={({ item }) => {
-            const stats = computeStreakStats(item.dateKeys);
-            const week = getLast7Days(item.dateKeys);
-            const checkedInToday = stats.checkedInToday;
+        {overview === undefined ? (
+          <ActivityIndicator style={{ marginTop: 24 }} color={colors.primary} />
+        ) : (
+          <FlatList
+            data={overview}
+            keyExtractor={({ habit }) => habit._id}
+            contentContainerStyle={{ paddingBottom: 180 }}
+            ListEmptyComponent={
+              <Text style={styles.empty}>
+                No streaks yet — tap + to start tracking something daily.
+              </Text>
+            }
+            renderItem={({ item }) => {
+              const stats = computeStreakStats(item.dateKeys);
+              const week = getLast7Days(item.dateKeys);
+              const checkedInToday = stats.checkedInToday;
 
-            return (
-              <SwipeableRow
-                style={{ marginBottom: 10 }}
-                completeColor={item.habit.color}
-                deleteColor={colors.danger}
-                onSwipeComplete={() =>
-                  toggleCheckin({ habitId: item.habit._id, dateKey: todayKey })
-                }
-                onSwipeDelete={() => handleDelete(item.habit._id, item.habit.name)}
-              >
-                <View style={styles.card}>
-                  <View style={styles.cardTop}>
-                    <View style={[styles.badge, { backgroundColor: item.habit.color + "20" }]}>
-                      <Ionicons name="flame" size={18} color={item.habit.color} />
-                      <Text style={[styles.badgeNumber, { color: item.habit.color }]}>
-                        {stats.current}
-                      </Text>
-                    </View>
-
-                    <View style={{ flex: 1, marginLeft: 12 }}>
-                      <Text style={styles.name}>{item.habit.name}</Text>
-                      <Text style={styles.caption}>
-                        {stats.current} day{stats.current === 1 ? "" : "s"} · best {stats.longest}
-                      </Text>
-                    </View>
-
-                    <TouchableOpacity
-                      onPress={() =>
-                        toggleCheckin({ habitId: item.habit._id, dateKey: todayKey })
-                      }
-                      style={[
-                        styles.checkInButton,
-                        {
-                          backgroundColor: checkedInToday ? item.habit.color : "transparent",
-                          borderColor: checkedInToday ? item.habit.color : colors.border,
-                        },
-                      ]}
-                    >
-                      
-                      <BouncyIcon active={checkedInToday}>
+              return (
+                <SwipeableRow
+                  style={{ marginBottom: 10 }}
+                  completeColor={item.habit.color}
+                  deleteColor={colors.danger}
+                  onSwipeComplete={() =>
+                    toggleCheckin({
+                      habitId: item.habit._id,
+                      dateKey: todayKey,
+                    })
+                  }
+                  onSwipeDelete={() =>
+                    handleDelete(item.habit._id, item.habit.name)
+                  }
+                >
+                  <View style={styles.card}>
+                    <View style={styles.cardTop}>
+                      <View
+                        style={[
+                          styles.badge,
+                          { backgroundColor: item.habit.color + "20" },
+                        ]}
+                      >
                         <Ionicons
-                          name={checkedInToday ? "flame" : "flame-outline"}
-                          size={22}
-                          color={checkedInToday ? "#fff" : colors.textMuted}
+                          name="flame"
+                          size={18}
+                          color={item.habit.color}
                         />
-                      </BouncyIcon>
-                    </TouchableOpacity>
-                    
-                  </View>
-
-                  <View style={styles.weekRow}>
-                    {week.map((day) => (
-                      <View key={day.key} style={styles.weekDay}>
-                        <View
+                        <Text
                           style={[
-                            styles.dot,
-                            {
-                              backgroundColor: day.checkedIn ? item.habit.color : "transparent",
-                              borderColor: day.checkedIn ? item.habit.color : colors.border,
-                            },
+                            styles.badgeNumber,
+                            { color: item.habit.color },
                           ]}
-                        />
-                        <Text style={styles.weekLabel}>{DAY_LABELS[day.weekday]}</Text>
+                        >
+                          {stats.current}
+                        </Text>
                       </View>
-                    ))}
-                  </View>
-                </View>
-              </SwipeableRow>
-            );
-          }}
-        />
-      )}
 
-      <HabitEditor
-        visible={editorOpen}
-        colors={colors}
-        onSave={handleCreate}
-        onClose={() => setEditorOpen(false)}
-      />
-    </View>
-    <View>
-      <TouchableOpacity
-                style={[styles.fab, { backgroundColor: colors.primary }]}
-                onPress={() => setEditorOpen(true)} >
-                <Ionicons name="add" size={30} color="#fff" />
-              </TouchableOpacity>
-    </View>
+                      <View style={{ flex: 1, marginLeft: 12 }}>
+                        <Text style={styles.name}>{item.habit.name}</Text>
+                        <Text style={styles.caption}>
+                          {stats.current} day{stats.current === 1 ? "" : "s"} ·
+                          best {stats.longest}
+                        </Text>
+                      </View>
+
+                      <TouchableOpacity
+                        onPress={() =>
+                          toggleCheckin({
+                            habitId: item.habit._id,
+                            dateKey: todayKey,
+                          })
+                        }
+                        style={[
+                          styles.checkInButton,
+                          {
+                            backgroundColor: checkedInToday
+                              ? item.habit.color
+                              : "transparent",
+                            borderColor: checkedInToday
+                              ? item.habit.color
+                              : colors.border,
+                          },
+                        ]}
+                      >
+                        <BouncyIcon active={checkedInToday}>
+                          <Ionicons
+                            name={checkedInToday ? "flame" : "flame-outline"}
+                            size={22}
+                            color={checkedInToday ? "#fff" : colors.textMuted}
+                          />
+                        </BouncyIcon>
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.weekRow}>
+                      {week.map((day) => (
+                        <View key={day.key} style={styles.weekDay}>
+                          <View
+                            style={[
+                              styles.dot,
+                              {
+                                backgroundColor: day.checkedIn
+                                  ? item.habit.color
+                                  : "transparent",
+                                borderColor: day.checkedIn
+                                  ? item.habit.color
+                                  : colors.border,
+                              },
+                            ]}
+                          />
+                          <Text style={styles.weekLabel}>
+                            {DAY_LABELS[day.weekday]}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                </SwipeableRow>
+              );
+            }}
+          />
+        )}
+
+        <TouchableOpacity
+          style={[styles.fab, { backgroundColor: colors.primary }]}
+          onPress={() => setEditorOpen(true)}
+        >
+          <Ionicons name="add" size={30} color="#fff" />
+        </TouchableOpacity>
+
+        <HabitEditor
+          visible={editorOpen}
+          colors={colors}
+          onSave={handleCreate}
+          onClose={() => setEditorOpen(false)}
+        />
+      </View>
     </>
   );
 }
@@ -180,10 +219,11 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       flex: 1,
       textAlign: "center",
     },
-     fab: {
+    fab: {
       position: "absolute",
       right: 20,
-      bottom: 30,
+      bottom: 108,
+      zIndex: 20,
       width: 58,
       height: 58,
       borderRadius: 18,

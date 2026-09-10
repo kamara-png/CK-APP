@@ -17,7 +17,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Animated, { SlideInRight, SlideOutRight } from "react-native-reanimated";
 
 function timeAgo(ms: number) {
   const diff = Date.now() - ms;
@@ -28,7 +27,10 @@ function timeAgo(ms: number) {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days}d ago`;
-  return new Date(ms).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return new Date(ms).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
 }
 
 export default function NotesListScreen() {
@@ -45,7 +47,9 @@ export default function NotesListScreen() {
     const q = search.trim().toLowerCase();
     if (!q) return notes;
     return notes.filter(
-      (n) => n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q)
+      (n) =>
+        n.title.toLowerCase().includes(q) ||
+        n.content.toLowerCase().includes(q),
     );
   }, [notes, search]);
 
@@ -66,11 +70,7 @@ export default function NotesListScreen() {
   };
 
   return (
-    <Animated.View
-      style={styles.container}
-      entering={SlideInRight.duration(280)}
-      exiting={SlideOutRight.duration(220)}
-    >
+    <View style={styles.container}>
       <EdgeSwipeBack />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
@@ -100,7 +100,9 @@ export default function NotesListScreen() {
           contentContainerStyle={styles.list}
           ListEmptyComponent={
             <Text style={styles.empty}>
-              {notes.length === 0 ? "No notes yet, tap + to do something for once" : "Hakuna matches."}
+              {notes.length === 0
+                ? "No notes yet, tap + to do something for once"
+                : "Hakuna matches."}
             </Text>
           }
           renderItem={({ item }) => (
@@ -117,7 +119,9 @@ export default function NotesListScreen() {
               <TouchableOpacity
                 style={[
                   styles.noteCard,
-                  item.color ? { borderLeftWidth: 4, borderLeftColor: item.color } : null,
+                  item.color
+                    ? { borderLeftWidth: 4, borderLeftColor: item.color }
+                    : null,
                 ]}
                 onPress={() => router.push(`/notes/${item._id}`)}
               >
@@ -125,7 +129,11 @@ export default function NotesListScreen() {
                   <Text style={styles.noteTitle} numberOfLines={1}>
                     {item.title.trim() || "Untitled"}
                   </Text>
-                  <Ionicons name="caret-forward" size={18} color={colors.textMuted} />
+                  <Ionicons
+                    name="caret-forward"
+                    size={18}
+                    color={colors.textMuted}
+                  />
                 </View>
                 <Text style={styles.noteSnippet} numberOfLines={2}>
                   {item.content.trim() || "Start writing your thought…"}
@@ -142,7 +150,7 @@ export default function NotesListScreen() {
       >
         <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
-    </Animated.View>
+    </View>
   );
 }
 
@@ -219,7 +227,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     fab: {
       position: "absolute",
       right: 20,
-      bottom: 28,
+      bottom: 108,
+      zIndex: 20,
       width: 58,
       height: 58,
       borderRadius: 18,

@@ -89,6 +89,8 @@ export default function TabsIndex() {
         initialPage={0}
         onPageScroll={handlePageScroll}
         onPageSelected={handlePageSelected}
+        scrollEnabled={!drawerOpen}
+        overdrag={false}
       >
         <View key="todos" style={styles.flex}>
           <TodosScreen onMenuPress={openDrawer} />

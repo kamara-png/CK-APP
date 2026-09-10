@@ -4,10 +4,10 @@ import { useEffect } from "react";
 import { Dimensions, Pressable, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
-    runOnJS,
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
 } from "react-native-reanimated";
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
@@ -70,7 +70,10 @@ export default function ProfileDrawer({
       "worklet";
       const nextX = event.translationX;
       translateX.value = Math.min(0, Math.max(-DRAWER_WIDTH, nextX));
-      backdropOpacity.value = Math.max(0, Math.min(1, 1 + nextX / DRAWER_WIDTH));
+      backdropOpacity.value = Math.max(
+        0,
+        Math.min(1, 1 + nextX / DRAWER_WIDTH),
+      );
     })
     .onEnd((event) => {
       "worklet";
@@ -89,17 +92,20 @@ export default function ProfileDrawer({
   // than just detecting a swipe and playing a canned open animation.
   const edgePan = Gesture.Pan()
     .enabled(edgeSwipeEnabled && !visible)
-    .activeOffsetX(15)
-    .failOffsetY([-20, 20])
+    .activeOffsetX([-8, 12])
+    .failOffsetY([-24, 24])
     .onUpdate((event) => {
       "worklet";
       const nextX = -DRAWER_WIDTH + event.translationX;
       translateX.value = Math.min(0, Math.max(-DRAWER_WIDTH, nextX));
-      backdropOpacity.value = Math.max(0, Math.min(1, 1 + nextX / DRAWER_WIDTH));
+      backdropOpacity.value = Math.max(
+        0,
+        Math.min(1, 1 + nextX / DRAWER_WIDTH),
+      );
     })
     .onEnd((event) => {
       "worklet";
-      if (event.translationX > DRAWER_WIDTH * 0.3 || event.velocityX > 500) {
+      if (event.translationX > DRAWER_WIDTH * 0.28 || event.velocityX > 450) {
         translateX.value = withSpring(0, OPEN_SPRING);
         backdropOpacity.value = withSpring(1, OPEN_SPRING);
         if (onOpen) runOnJS(onOpen)();
@@ -149,7 +155,7 @@ const styles = StyleSheet.create({
   edgeZone: {
     position: "absolute",
     left: 0,
-    top: 0,
+    top: 80,
     bottom: 0,
     width: EDGE_ZONE_WIDTH,
   },

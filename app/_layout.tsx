@@ -2,18 +2,24 @@ import SignInScreen from "@/components/auth/SignInScreen";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { secureTokenStorage } from "@/lib/authStorage";
 import { configureNotifications } from "@/lib/notifications";
-import {
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-    useFonts,
-} from "@expo-google-fonts/inter";
 import { ConvexAuthProvider, useConvexAuth } from "@convex-dev/auth/react";
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  useFonts,
+} from "@expo-google-fonts/inter";
 import { ConvexReactClient } from "convex/react";
 import { Stack } from "expo-router";
 import { ReactNode, useEffect } from "react";
-import { ActivityIndicator, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const convexUrl = process.env.EXPO_PUBLIC_CONVEX_URL;
@@ -21,20 +27,27 @@ const convexUrl = process.env.EXPO_PUBLIC_CONVEX_URL;
 // Only construct the client if we actually have a URL — the SDK throws
 // synchronously at module load otherwise, which freezes the app before
 // React ever renders (no error screen, just a stuck splash screen).
-const convex = convexUrl ? new ConvexReactClient(convexUrl, {
-  unsavedChangesWarning: false,
-}) : null;
-
+const convex = convexUrl
+  ? new ConvexReactClient(convexUrl, {
+      unsavedChangesWarning: false,
+    })
+  : null;
 
 function applyGlobalFont() {
-  // @ts-expect-error — defaultProps exists at runtime even though newer RN types omit it
+  // @ts-ignore — defaultProps exists at runtime even though newer RN types omit it
   Text.defaultProps = Text.defaultProps || {};
-  // @ts-expect-error
-  Text.defaultProps.style = [{ fontFamily: "Inter_400Regular" }, Text.defaultProps.style];
-  // @ts-expect-error
+  // @ts-ignore
+  Text.defaultProps.style = [
+    { fontFamily: "Inter_400Regular" },
+    (Text as any).defaultProps.style,
+  ];
+  // @ts-ignore
   TextInput.defaultProps = TextInput.defaultProps || {};
-  // @ts-expect-error
-  TextInput.defaultProps.style = [{ fontFamily: "Inter_400Regular" }, TextInput.defaultProps.style];
+  // @ts-ignore
+  TextInput.defaultProps.style = [
+    { fontFamily: "Inter_400Regular" },
+    (TextInput as any).defaultProps.style,
+  ];
 }
 
 function MissingEnvScreen() {
@@ -43,12 +56,12 @@ function MissingEnvScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>Convex URL missing</Text>
         <Text style={styles.body}>
-          EXPO_PUBLIC_CONVEX_URL isn&apos;t set, so the app can&apos;t connect to your
-          backend.{"\n\n"}
+          EXPO_PUBLIC_CONVEX_URL isn&apos;t set, so the app can&apos;t connect
+          to your backend.{"\n\n"}
           1. Run `npx convex dev` in your project folder.{"\n"}
           2. Confirm it wrote EXPO_PUBLIC_CONVEX_URL into .env.local.{"\n"}
-          3. Restart Expo (stop and re-run `npx expo start`) so it picks up
-          the env file — env vars are only read at startup.
+          3. Restart Expo (stop and re-run `npx expo start`) so it picks up the
+          env file — env vars are only read at startup.
         </Text>
       </View>
     </GestureHandlerRootView>
@@ -100,7 +113,9 @@ export default function RootLayout() {
   }
 
   if (!fontsLoaded) {
-    return <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#0f172a" }} />;
+    return (
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#0f172a" }} />
+    );
   }
 
   return (
@@ -108,15 +123,28 @@ export default function RootLayout() {
       <ConvexAuthProvider client={convex} storage={secureTokenStorage}>
         <ThemeProvider>
           <AuthGate>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)" />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: "#0f172a" },
+              }}
+            >
+              <Stack.Screen
+                name="(tabs)"
+                options={{
+                  animation: "fade",
+                  gestureEnabled: false,
+                  contentStyle: { backgroundColor: "#0f172a" },
+                }}
+              />
               <Stack.Screen
                 name="notes/index"
                 options={{
                   animation: "slide_from_right",
                   gestureEnabled: true,
                   gestureDirection: "horizontal",
-                  fullScreenGestureEnabled: true,
+                  animationDuration: 280,
+                  contentStyle: { backgroundColor: "#0f172a" },
                 }}
               />
               <Stack.Screen
@@ -125,7 +153,8 @@ export default function RootLayout() {
                   animation: "slide_from_right",
                   gestureEnabled: true,
                   gestureDirection: "horizontal",
-                  fullScreenGestureEnabled: true,
+                  animationDuration: 280,
+                  contentStyle: { backgroundColor: "#0f172a" },
                 }}
               />
             </Stack>
@@ -157,5 +186,4 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     textAlign: "left",
   },
-  
 });

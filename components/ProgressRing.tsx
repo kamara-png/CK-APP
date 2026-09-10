@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { View } from "react-native";
-import Svg, { Circle } from "react-native-svg";
 import Animated, {
+  Easing,
   useAnimatedProps,
   useSharedValue,
   withTiming,
-  Easing,
 } from "react-native-reanimated";
+import Svg, { Circle } from "react-native-svg";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -31,10 +31,22 @@ const ProgressRing = ({
   const circumference = 2 * Math.PI * radius;
   const clamped = Math.max(0, Math.min(100, percent));
 
+  // Always start from 0 so the ring replays its fill animation on mount.
   const progress = useSharedValue(0);
 
   useEffect(() => {
-    progress.value = withTiming(clamped, { duration: 700, easing: Easing.out(Easing.cubic) });
+    // Reset to 0 first (in case the value changed mid-animation), then
+    // animate up to the target. Small delay ensures the reset paints
+    // before the timing starts, otherwise Reanimated may batch them and
+    // skip the animation entirely.
+    progress.value = 0;
+    const id = setTimeout(() => {
+      progress.value = withTiming(clamped, {
+        duration: 700,
+        easing: Easing.out(Easing.cubic),
+      });
+    }, 50);
+    return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- shared value is a stable ref
   }, [clamped]);
 
@@ -43,7 +55,14 @@ const ProgressRing = ({
   }));
 
   return (
-    <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
+    <View
+      style={{
+        width: size,
+        height: size,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <Svg width={size} height={size} style={{ position: "absolute" }}>
         <Circle
           cx={size / 2}
@@ -63,7 +82,6 @@ const ProgressRing = ({
           strokeLinecap="round"
           strokeDasharray={`${circumference} ${circumference}`}
           animatedProps={animatedProps}
-          // Start the ring from the top (12 o'clock) instead of the 3 o'clock default.
           rotation="-90"
           originX={size / 2}
           originY={size / 2}

@@ -1,6 +1,8 @@
 import ColorPicker from "@/components/ColorPicker";
 import EdgeSwipeBack from "@/components/EdgeSwipeBack";
-import FormattingToolbar, { FormatAction } from "@/components/FormattingToolbar";
+import FormattingToolbar, {
+  FormatAction,
+} from "@/components/FormattingToolbar";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -11,23 +13,33 @@ import { BlurView } from "expo-blur";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    InputAccessoryView,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  InputAccessoryView,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import Animated, { SlideInRight, SlideOutRight } from "react-native-reanimated";
 
 const AUTOSAVE_DELAY_MS = 600;
-const NOTE_COLORS = [null, "#ef4444", "#f97316", "#f59e0b", "#84cc16", "#10b981", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899"];
+const NOTE_COLORS = [
+  null,
+  "#ef4444",
+  "#f97316",
+  "#f59e0b",
+  "#84cc16",
+  "#10b981",
+  "#06b6d4",
+  "#3b82f6",
+  "#8b5cf6",
+  "#ec4899",
+];
 const FORMAT_TOOLBAR_ID = "note-editor-format-toolbar";
 
 export default function NoteEditorScreen() {
@@ -43,7 +55,7 @@ export default function NoteEditorScreen() {
   const createNote = useMutation(api.notes.createNote);
   const backlinks = useQuery(
     api.notes.getBacklinks,
-    note ? { title: note.title } : "skip"
+    note ? { title: note.title } : "skip",
   );
 
   const [title, setTitle] = useState("");
@@ -160,7 +172,9 @@ export default function NoteEditorScreen() {
   };
 
   const handleLinkPress = async (linkTitle: string) => {
-    const existing = await convex.query(api.notes.findNoteByTitle, { title: linkTitle });
+    const existing = await convex.query(api.notes.findNoteByTitle, {
+      title: linkTitle,
+    });
     if (existing) {
       router.push(`/notes/${existing._id}`);
       return;
@@ -196,7 +210,12 @@ export default function NoteEditorScreen() {
 
   if (note === undefined) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <ActivityIndicator color={colors.primary} />
       </View>
     );
@@ -204,49 +223,82 @@ export default function NoteEditorScreen() {
 
   if (note === null) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
-        <Text style={{ color: colors.textMuted }}>This note no longer exists.</Text>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <Text style={{ color: colors.textMuted }}>
+          This note no longer exists.
+        </Text>
       </View>
     );
   }
 
   return (
-    <Animated.View
+    <KeyboardAvoidingView
       style={{ flex: 1 }}
-      entering={SlideInRight.duration(280)}
-      exiting={SlideOutRight.duration(220)}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <EdgeSwipeBack />
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.headerIconButton}>
+          <TouchableOpacity
+            onPress={handleBack}
+            style={styles.headerIconButton}
+          >
             <Ionicons name="chevron-back" size={26} color={colors.primary} />
           </TouchableOpacity>
           <View style={styles.modeSwitch}>
             <TouchableOpacity
-              style={[styles.modeButton, mode === "write" && { backgroundColor: colors.primary }]}
+              style={[
+                styles.modeButton,
+                mode === "write" && { backgroundColor: colors.primary },
+              ]}
               onPress={() => setMode("write")}
             >
-              <Text style={{ color: mode === "write" ? "#fff" : colors.textMuted, fontWeight: "600" }}>
+              <Text
+                style={{
+                  color: mode === "write" ? "#fff" : colors.textMuted,
+                  fontWeight: "600",
+                }}
+              >
                 Write
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.modeButton, mode === "preview" && { backgroundColor: colors.primary }]}
+              style={[
+                styles.modeButton,
+                mode === "preview" && { backgroundColor: colors.primary },
+              ]}
               onPress={() => setMode("preview")}
             >
-              <Text style={{ color: mode === "preview" ? "#fff" : colors.textMuted, fontWeight: "600" }}>
+              <Text
+                style={{
+                  color: mode === "preview" ? "#fff" : colors.textMuted,
+                  fontWeight: "600",
+                }}
+              >
                 Preview
               </Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={() => setOptionsOpen(true)} style={styles.headerIconButton}>
-            <Ionicons name="ellipsis-horizontal-circle-outline" size={24} color={colors.text} />
+          <TouchableOpacity
+            onPress={() => setOptionsOpen(true)}
+            style={styles.headerIconButton}
+          >
+            <Ionicons
+              name="ellipsis-horizontal-circle-outline"
+              size={24}
+              color={colors.text}
+            />
           </TouchableOpacity>
         </View>
 
-        {savedState === "saving" && <Text style={styles.savingHint}>Saving…</Text>}
+        {savedState === "saving" && (
+          <Text style={styles.savingHint}>Saving…</Text>
+        )}
 
         {mode === "write" && Platform.OS !== "ios" && (
           <View style={styles.androidToolbarRow}>
@@ -261,7 +313,10 @@ export default function NoteEditorScreen() {
           </View>
         )}
 
-        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1 }}>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
           <TextInput
             style={styles.titleInput}
             value={title}
@@ -280,7 +335,9 @@ export default function NoteEditorScreen() {
               placeholderTextColor={colors.textMuted}
               multiline
               textAlignVertical="top"
-              inputAccessoryViewID={Platform.OS === "ios" ? FORMAT_TOOLBAR_ID : undefined}
+              inputAccessoryViewID={
+                Platform.OS === "ios" ? FORMAT_TOOLBAR_ID : undefined
+              }
             />
           ) : (
             <View style={{ paddingVertical: 8 }}>
@@ -291,7 +348,9 @@ export default function NoteEditorScreen() {
                 onToggleChecklist={toggleChecklistLine}
               />
               {content.trim() === "" && (
-                <Text style={{ color: colors.textMuted }}>Nothing to preview yet.</Text>
+                <Text style={{ color: colors.textMuted }}>
+                  Nothing to preview yet.
+                </Text>
               )}
             </View>
           )}
@@ -300,8 +359,13 @@ export default function NoteEditorScreen() {
             <View style={styles.backlinksSection}>
               <Text style={styles.backlinksTitle}>Linked from</Text>
               {backlinks.map((b) => (
-                <TouchableOpacity key={b._id} onPress={() => router.push(`/notes/${b._id}`)}>
-                  <Text style={styles.backlinkItem}>{b.title.trim() || "Untitled"}</Text>
+                <TouchableOpacity
+                  key={b._id}
+                  onPress={() => router.push(`/notes/${b._id}`)}
+                >
+                  <Text style={styles.backlinkItem}>
+                    {b.title.trim() || "Untitled"}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -311,7 +375,12 @@ export default function NoteEditorScreen() {
 
       {Platform.OS === "ios" && mode === "write" && (
         <InputAccessoryView nativeID={FORMAT_TOOLBAR_ID}>
-          <View style={[styles.iosAccessoryRow, { backgroundColor: colors.surface }]}>
+          <View
+            style={[
+              styles.iosAccessoryRow,
+              { backgroundColor: colors.surface },
+            ]}
+          >
             <View style={{ flex: 1 }}>
               <FormattingToolbar colors={colors} onFormat={applyFormat} />
             </View>
@@ -325,9 +394,23 @@ export default function NoteEditorScreen() {
         </InputAccessoryView>
       )}
 
-      <Modal visible={optionsOpen} transparent animationType="slide" onRequestClose={() => setOptionsOpen(false)}>
-        <TouchableOpacity style={styles.pickerBackdrop} activeOpacity={1} onPress={() => setOptionsOpen(false)}>
-          <BlurView intensity={45} tint="dark" style={StyleSheet.absoluteFill} pointerEvents="none" />
+      <Modal
+        visible={optionsOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setOptionsOpen(false)}
+      >
+        <TouchableOpacity
+          style={styles.pickerBackdrop}
+          activeOpacity={1}
+          onPress={() => setOptionsOpen(false)}
+        >
+          <BlurView
+            intensity={45}
+            tint="dark"
+            style={StyleSheet.absoluteFill}
+            pointerEvents="none"
+          />
           <TouchableOpacity activeOpacity={1} style={styles.optionsSheet}>
             <View style={styles.sheetHandle} />
             <Text style={styles.pickerTitle}>Note Options</Text>
@@ -347,7 +430,9 @@ export default function NoteEditorScreen() {
                     },
                   ]}
                 >
-                  {!c && <Ionicons name="close" size={12} color={colors.textMuted} />}
+                  {!c && (
+                    <Ionicons name="close" size={12} color={colors.textMuted} />
+                  )}
                 </TouchableOpacity>
               ))}
               <TouchableOpacity
@@ -360,14 +445,22 @@ export default function NoteEditorScreen() {
                   styles.customSwatch,
                   {
                     borderColor:
-                      color && !NOTE_COLORS.includes(color) ? colors.text : colors.border,
+                      color && !NOTE_COLORS.includes(color)
+                        ? colors.text
+                        : colors.border,
                     borderWidth: color && !NOTE_COLORS.includes(color) ? 2 : 1,
                     backgroundColor:
-                      color && !NOTE_COLORS.includes(color) ? color : "transparent",
+                      color && !NOTE_COLORS.includes(color)
+                        ? color
+                        : "transparent",
                   },
                 ]}
               >
-                <Ionicons name="color-palette-outline" size={14} color={colors.textMuted} />
+                <Ionicons
+                  name="color-palette-outline"
+                  size={14}
+                  color={colors.textMuted}
+                />
               </TouchableOpacity>
             </View>
 
@@ -385,7 +478,12 @@ export default function NoteEditorScreen() {
         </TouchableOpacity>
       </Modal>
 
-      <Modal visible={customPickerOpen} transparent animationType="fade" onRequestClose={() => setCustomPickerOpen(false)}>
+      <Modal
+        visible={customPickerOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCustomPickerOpen(false)}
+      >
         <BlurView intensity={45} tint="dark" style={styles.pickerBackdrop}>
           <View style={styles.pickerCard}>
             <View style={styles.pickerHeader}>
@@ -413,7 +511,6 @@ export default function NoteEditorScreen() {
         </BlurView>
       </Modal>
     </KeyboardAvoidingView>
-    </Animated.View>
   );
 }
 
