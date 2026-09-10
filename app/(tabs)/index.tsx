@@ -15,48 +15,74 @@ import Animated, {
 } from "react-native-reanimated";
 
 const TABS = [
-  { key: "todos", label: "Todos", icon: "flash-outline" as const, activeIcon: "flash" as const },
-  { key: "streaks", label: "Streaks", icon: "flame-outline" as const, activeIcon: "flame" as const },
-  { key: "statistics", label: "Stats", icon: "podium-outline" as const, activeIcon: "podium" as const },
+  {
+    key: "todos",
+    label: "Todos",
+    icon: "flash-outline" as const,
+    activeIcon: "flash" as const,
+  },
+  {
+    key: "streaks",
+    label: "Streaks",
+    icon: "flame-outline" as const,
+    activeIcon: "flame" as const,
+  },
+  {
+    key: "statistics",
+    label: "Stats",
+    icon: "podium-outline" as const,
+    activeIcon: "podium" as const,
+  },
 ];
 
 export default function TabsIndex() {
   const { colors } = useTheme();
+
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const pagerRef = useRef<PagerView>(null);
-
-  // Continuous 0..(TABS.length - 1) scroll position, updated on every frame
-  // of the drag — not just on settle — so the tab bar can track the finger
-  // the same way Instagram's bottom bar highlight tracks its feed/reels swipe.
   const scrollPosition = useSharedValue(0);
-
   const handlePageScroll = useCallback(
-    (event: { nativeEvent: { position: number; offset: number } }) => {
+    (event: {
+      nativeEvent: {
+        position: number;
+        offset: number;
+      };
+    }) => {
       const { position, offset } = event.nativeEvent;
       scrollPosition.value = position + offset;
     },
-    [scrollPosition]
+    [scrollPosition],
   );
 
   const handlePageSelected = useCallback(
-    (event: { nativeEvent: { position: number } }) => {
+    (event: {
+      nativeEvent: {
+        position: number;
+      };
+    }) => {
       setActiveIndex(event.nativeEvent.position);
     },
-    []
+    [],
   );
 
   const goToPage = (index: number) => {
     pagerRef.current?.setPage(index);
   };
 
-  const openDrawer = useCallback(() => setDrawerOpen(true), []);
-  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
+  const openDrawer = useCallback(() => {
+    setDrawerOpen(true);
+  }, []);
+
+  const closeDrawer = useCallback(() => {
+    setDrawerOpen(false);
+  }, []);
 
   const styles = createStyles(colors);
 
   return (
     <View style={styles.flex}>
+      {/*// Main screen */}
       <PagerView
         ref={pagerRef}
         style={styles.flex}
@@ -67,35 +93,52 @@ export default function TabsIndex() {
         <View key="todos" style={styles.flex}>
           <TodosScreen onMenuPress={openDrawer} />
         </View>
+
         <View key="streaks" style={styles.flex}>
           <StreaksScreen />
         </View>
+
         <View key="statistics" style={styles.flex}>
           <StatisticsScreen />
         </View>
       </PagerView>
 
-      <BlurView
-        intensity={70}
-        tint={colors.isDark ? "dark" : "light"}
-        experimentalBlurMethod="dimezisBlurView"
-        style={[styles.tabBar, { borderTopColor: colors.border + "33" }]}
-      >
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.surface + "26" }]} />
-        {TABS.map((tab, index) => (
-          <TabBarIcon
-            key={tab.key}
-            index={index}
-            label={tab.label}
-            icon={tab.icon}
-            activeIcon={tab.activeIcon}
-            scrollPosition={scrollPosition}
-            activeColor={colors.primary}
-            inactiveColor={colors.textMuted}
-            onPress={() => goToPage(index)}
-          />
-        ))}
-      </BlurView>
+      {/*// floating tab bar */}
+      <View pointerEvents="box-none" style={styles.floatingBarContainer}>
+        <BlurView
+          intensity={100}
+          tint={colors.isDark ? "dark" : "light"}
+          experimentalBlurMethod="dimezisBlurView"
+          style={[
+            styles.tabBar,
+            {
+              borderColor: colors.border + "30",
+              backgroundColor: colors.surface + "55",
+              shadowColor: colors.shadow,
+            },
+          ]}
+        >
+          {TABS.map((tab, index) => (
+            <TabBarIcon
+              key={tab.key}
+              index={index}
+              label={tab.label}
+              icon={tab.icon}
+              activeIcon={tab.activeIcon}
+              scrollPosition={scrollPosition}
+              pillColor={colors.primary}
+              activeIconColor="#fff"
+              inactiveColor={colors.textMuted}
+              labelColor={colors.text}
+              onPress={() => goToPage(index)}
+            />
+          ))}
+        </BlurView>
+      </View>
+
+      {/* =========================
+          PROFILE DRAWER
+      ========================== */}
 
       <ProfileDrawer
         visible={drawerOpen}
@@ -110,14 +153,20 @@ export default function TabsIndex() {
   );
 }
 
+/* =========================================
+   TAB BAR ICON
+========================================= */
+
 interface TabBarIconProps {
   index: number;
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
   activeIcon: keyof typeof Ionicons.glyphMap;
   scrollPosition: ReturnType<typeof useSharedValue<number>>;
-  activeColor: string;
+  pillColor: string;
+  activeIconColor: string;
   inactiveColor: string;
+  labelColor: string;
   onPress: () => void;
 }
 
@@ -127,79 +176,196 @@ function TabBarIcon({
   icon,
   activeIcon,
   scrollPosition,
-  activeColor,
+  pillColor,
+  activeIconColor,
   inactiveColor,
+  labelColor,
   onPress,
 }: TabBarIconProps) {
-  // Distance (0 = dead-center-active, 1 = one full page away) drives both a
-  // scale bump and a cross-fade between the outline/filled icon,
-  // continuously as the pager is dragged — this is the bit that makes the
-  // bar feel alive mid-swipe instead of just snapping at the end.
+  /*
+   * Scale animation
+   *
+   * The closer the tab is to the active page,
+   * the larger it becomes.
+   */
   const scaleStyle = useAnimatedStyle(() => {
     const distance = Math.min(1, Math.abs(scrollPosition.value - index));
+
     return {
-      transform: [{ scale: 1 + (1 - distance) * 0.12 }],
+      transform: [
+        {
+          scale: 1 + (1 - distance) * 0.08,
+        },
+      ],
     };
   });
 
+  /*
+   * Active icon opacity
+   */
   const activeStyle = useAnimatedStyle(() => {
     const distance = Math.min(1, Math.abs(scrollPosition.value - index));
-    return { opacity: 1 - distance };
+
+    return {
+      opacity: 1 - distance,
+    };
   });
 
+  /*
+   * Inactive icon opacity
+   */
   const inactiveStyle = useAnimatedStyle(() => {
     const distance = Math.min(1, Math.abs(scrollPosition.value - index));
-    return { opacity: distance };
+
+    return {
+      opacity: distance,
+    };
   });
 
-  const labelStyle = useAnimatedStyle(() => {
+  /*
+   * Active pill background
+   */
+  const indicatorStyle = useAnimatedStyle(() => {
     const distance = Math.min(1, Math.abs(scrollPosition.value - index));
-    return { opacity: 1 - distance * 0.7 };
+
+    return {
+      opacity: 1 - distance,
+      transform: [
+        {
+          scale: 0.8 + (1 - distance) * 0.2,
+        },
+      ],
+    };
   });
 
   return (
-    <TouchableOpacity style={iconStyles.tabButton} onPress={onPress} activeOpacity={0.7}>
-      <Animated.View style={scaleStyle}>
+    <TouchableOpacity
+      style={iconStyles.tabButton}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      <Animated.View style={[iconStyles.iconContainer, scaleStyle]}>
+        {/* =========================
+            ACTIVE PILL (theme-colored)
+        ========================== */}
+
+        <Animated.View
+          style={[
+            iconStyles.activeBackground,
+            indicatorStyle,
+            { backgroundColor: pillColor },
+          ]}
+        />
+
+        {/* =========================
+            ACTIVE ICON
+        ========================== */}
+
         <Animated.View style={[iconStyles.iconLayer, activeStyle]}>
-          <Ionicons name={activeIcon} size={24} color={activeColor} />
+          <Ionicons name={activeIcon} size={23} color={activeIconColor} />
         </Animated.View>
+
+        {/* =========================
+            INACTIVE ICON
+        ========================== */}
+
         <Animated.View style={inactiveStyle}>
-          <Ionicons name={icon} size={24} color={inactiveColor} />
+          <Ionicons name={icon} size={23} color={inactiveColor} />
         </Animated.View>
       </Animated.View>
-      <Animated.Text style={[iconStyles.label, { color: activeColor }, labelStyle]}>
+      <Animated.Text style={[iconStyles.label, { color: labelColor }]}>
         {label}
       </Animated.Text>
     </TouchableOpacity>
   );
 }
 
+/* =========================================
+   TAB ICON STYLES
+========================================= */
+
 const iconStyles = StyleSheet.create({
   tabButton: {
     flex: 1,
+    height: 62,
     alignItems: "center",
     justifyContent: "center",
-    gap: 2,
+    position: "relative",
   },
+
+  iconContainer: {
+    width: 40,
+    height: 32,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  activeBackground: {
+    position: "absolute",
+    width: 40,
+    height: 32,
+    borderRadius: 23,
+  },
+
   iconLayer: {
     position: "absolute",
   },
+
   label: {
-    fontSize: 11,
-    fontWeight: "600",
-    marginTop: 22,
+    fontSize: 10,
+    marginTop: 2,
   },
 });
 
+/* =========================================
+   SCREEN / TAB BAR STYLES
+========================================= */
+
 const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
   StyleSheet.create({
-    flex: { flex: 1, backgroundColor: colors.bg },
+    flex: {
+      flex: 1,
+      backgroundColor: colors.bg,
+    },
+
+    /*
+     * Keeps the navigation floating above
+     * the bottom of the screen.
+     */
+    floatingBarContainer: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 24,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    /*
+     * Main floating pill
+     */
     tabBar: {
+      width: "78%",
+      height: 68,
+
       flexDirection: "row",
-      height: 90,
-      paddingBottom: 26,
-      paddingTop: 14,
-      borderTopWidth: StyleSheet.hairlineWidth,
+      alignItems: "center",
+      justifyContent: "space-around",
+
+      borderRadius: 40,
+      borderWidth: StyleSheet.hairlineWidth,
       overflow: "hidden",
+
+      // iOS shadow
+      shadowOffset: {
+        width: 0,
+        height: 10,
+      },
+      shadowOpacity: 0.22,
+      shadowRadius: 18,
+
+      // Android shadow
+      elevation: 12,
     },
   });
