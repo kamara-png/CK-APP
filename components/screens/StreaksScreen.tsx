@@ -3,6 +3,7 @@ import HabitEditor from "@/components/HabitEditor";
 import SwipeableRow from "@/components/SwipeableRow";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { createFabStyle, createScreenHeaderStyles } from "@/assets/styles/common";
 import useTheme from "@/hooks/useTheme";
 import {
   computeStreakStats,
@@ -32,6 +33,8 @@ export default function StreaksScreen() {
   const toggleCheckin = useMutation(api.habits.toggleCheckin);
   const [editorOpen, setEditorOpen] = useState(false);
 
+  const headerStyles = createScreenHeaderStyles(colors);
+  const fabStyles = createFabStyle(colors);
   const styles = createStyles(colors);
   const todayKey = getLocalDateKey();
 
@@ -54,8 +57,8 @@ export default function StreaksScreen() {
   return (
     <>
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Streaks</Text>
+        <View style={headerStyles.header}>
+          <Text style={headerStyles.title}>Streaks</Text>
         </View>
 
         {overview === undefined ? (
@@ -180,7 +183,7 @@ export default function StreaksScreen() {
         )}
 
         <TouchableOpacity
-          style={[styles.fab, { backgroundColor: colors.primary }]}
+          style={[fabStyles.fab, { bottom: 108, zIndex: 20 }]}
           onPress={() => setEditorOpen(true)}
         >
           <Ionicons name="add" size={30} color="#fff" />
@@ -204,36 +207,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       backgroundColor: colors.bg,
       paddingHorizontal: 16,
       paddingTop: 60,
-    },
-    header: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 16,
-    },
-    headerAction: { width: 30 },
-    title: {
-      fontSize: 30,
-      fontWeight: "900",
-      color: colors.text,
-      flex: 1,
-      textAlign: "center",
-    },
-    fab: {
-      position: "absolute",
-      right: 20,
-      bottom: 108,
-      zIndex: 20,
-      width: 58,
-      height: 58,
-      borderRadius: 18,
-      alignItems: "center",
-      justifyContent: "center",
-      elevation: 6,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.3,
-      shadowRadius: 5,
     },
     empty: {
       color: colors.textMuted,

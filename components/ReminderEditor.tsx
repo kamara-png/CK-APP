@@ -1,4 +1,5 @@
 import DateTimeField from "@/components/DateTimeField";
+import { createModalStyles } from "@/assets/styles/common";
 import { ColorScheme } from "@/hooks/useTheme";
 import { ReminderSound } from "@/lib/notifications";
 import { Ionicons } from "@expo/vector-icons";
@@ -36,16 +37,17 @@ export default function ReminderEditor({
 }: ReminderEditorProps) {
   const [date, setDate] = useState(initialDate);
   const [sound, setSound] = useState<ReminderSound>(initialSound);
+  const modalStyles = createModalStyles(colors);
   const styles = createStyles(colors);
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <BlurView intensity={45} tint="dark" style={styles.backdrop}>
-        <View style={styles.card}>
-          <View style={styles.header}>
-            <View style={styles.headerSide} />
-            <Text style={styles.title}>Set reminder</Text>
-            <TouchableOpacity onPress={onClose} style={styles.headerSide}>
+      <BlurView intensity={45} tint="dark" style={modalStyles.backdrop}>
+        <View style={modalStyles.card}>
+          <View style={modalStyles.header}>
+            <View style={modalStyles.headerSide} />
+            <Text style={modalStyles.title}>Set reminder</Text>
+            <TouchableOpacity onPress={onClose} style={modalStyles.headerSide}>
               <Ionicons name="close" size={22} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
@@ -117,31 +119,6 @@ export default function ReminderEditor({
 
 const createStyles = (colors: ColorScheme) =>
   StyleSheet.create({
-    backdrop: {
-      flex: 1,
-      backgroundColor: "rgba(0,0,0,0.25)",
-      justifyContent: "center",
-      padding: 24,
-    },
-    card: {
-      backgroundColor: colors.surface,
-      borderRadius: 16,
-      padding: 20,
-    },
-    header: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 16,
-    },
-    title: {
-      fontSize: 18,
-      fontWeight: "700",
-      color: colors.text,
-      flex: 1,
-      textAlign: "center",
-    },
-    headerSide: { width: 22 },
     label: {
       fontSize: 13,
       fontWeight: "600",

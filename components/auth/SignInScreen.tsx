@@ -1,3 +1,4 @@
+import { createInputStyles } from "@/assets/styles/common";
 import useTheme from "@/hooks/useTheme";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { Ionicons } from "@expo/vector-icons";
@@ -43,6 +44,7 @@ export default function SignInScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const inputStyles = createInputStyles(colors);
   const styles = createStyles(colors);
 
   const canSubmit =
@@ -94,10 +96,10 @@ export default function SignInScreen() {
 
       <View style={styles.form}>
         {flow === "signUp" && (
-          <View style={styles.inputRow}>
+          <View style={inputStyles.row}>
             <Ionicons name="person-outline" size={18} color={colors.textMuted} />
             <TextInput
-              style={styles.input}
+              style={inputStyles.field}
               value={name}
               onChangeText={setName}
               placeholder="Your name"
@@ -107,10 +109,10 @@ export default function SignInScreen() {
           </View>
         )}
 
-        <View style={styles.inputRow}>
+        <View style={inputStyles.row}>
           <Ionicons name="mail-outline" size={18} color={colors.textMuted} />
           <TextInput
-            style={styles.input}
+            style={inputStyles.field}
             value={email}
             onChangeText={setEmail}
             placeholder="Email"
@@ -121,10 +123,10 @@ export default function SignInScreen() {
           />
         </View>
 
-        <View style={styles.inputRow}>
+        <View style={inputStyles.row}>
           <Ionicons name="lock-closed-outline" size={18} color={colors.textMuted} />
           <TextInput
-            style={styles.input}
+            style={inputStyles.field}
             value={password}
             onChangeText={setPassword}
             placeholder="Password (min 8 characters)"
@@ -213,22 +215,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     },
     form: {
       gap: 12,
-    },
-    inputRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 10,
-      backgroundColor: colors.backgrounds.input,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 12,
-      paddingHorizontal: 14,
-    },
-    input: {
-      flex: 1,
-      paddingVertical: 14,
-      color: colors.text,
-      fontSize: 15,
     },
     error: {
       color: colors.danger,

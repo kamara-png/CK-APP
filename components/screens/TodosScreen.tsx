@@ -7,6 +7,7 @@ import UndoToast from "@/components/UndoToast";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useSlowLoadingHint } from "@/hooks/useSlowLoadingHint";
+import { createFabStyle, createScreenHeaderStyles } from "@/assets/styles/common";
 import useTheme from "@/hooks/useTheme";
 import {
   cancelTodoReminder,
@@ -197,6 +198,8 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
     setEditTarget(null);
   };
 
+  const headerStyles = createScreenHeaderStyles(colors);
+  const fabStyles = createFabStyle(colors);
   const styles = createStyles(colors);
   const editingTodo = editTarget
     ? todos?.find((t) => t._id === editTarget)
@@ -205,11 +208,11 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
   return (
     <>
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={headerStyles.header}>
           <TouchableOpacity onPress={onMenuPress} activeOpacity={0.6} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} style={styles.headerAction}>
             <Ionicons name="menu" size={30} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.title}>To-dos</Text>
+          <Text style={headerStyles.title}>To-dos</Text>
           <TouchableOpacity onPress={() => router.push("/notes")}>
             <Ionicons name="duplicate-outline" size={30} color={colors.text} />
           </TouchableOpacity>
@@ -372,7 +375,7 @@ export default function TodosScreen({ onMenuPress }: TodosScreenProps) {
         )}
 
         <TouchableOpacity
-          style={[styles.fab, { backgroundColor: colors.primary }]}
+          style={[fabStyles.fab, { bottom: 108, zIndex: 20 }]}
           onPress={() => setAddModalOpen(true)}
         >
           <Ionicons name="add" size={30} color="#fff" />
@@ -429,20 +432,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       paddingHorizontal: 16,
       paddingTop: 60,
     },
-    header: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 16,
-    },
     headerAction: { width: 44, height: 44, alignItems: "center", justifyContent: "center", marginLeft: -6 },
-    title: {
-      fontSize: 30,
-      fontWeight: "900",
-      flex: 1,
-      textAlign: "center",
-      color: colors.text,
-    },
     searchRow: {
       flexDirection: "row",
       alignItems: "center",
@@ -530,21 +520,5 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       paddingHorizontal: 24,
       fontSize: 13,
       lineHeight: 18,
-    },
-    fab: {
-      position: "absolute",
-      right: 20,
-      bottom: 108, // was 30 — clears floating tab bar
-      width: 58,
-      height: 58,
-      borderRadius: 18,
-      alignItems: "center",
-      justifyContent: "center",
-      elevation: 6,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.3,
-      shadowRadius: 5,
-      zIndex: 20,
     },
   });

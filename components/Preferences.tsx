@@ -1,4 +1,5 @@
 import { createSettingsStyles } from "@/assets/styles/settings.styles";
+import { createSheetStyles } from "@/assets/styles/common";
 import useTheme, { ACCENT_OPTIONS, ThemeAccent } from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -19,6 +20,7 @@ const accentIcons: Record<ThemeAccent, keyof typeof Ionicons.glyphMap> = {
 const Preferences = () => {
   const { colors, accent, setAccent, mode, toggleMode } = useTheme();
   const settingsStyles = createSettingsStyles(colors);
+  const sheetStyles = createSheetStyles(colors);
   const styles = createLocalStyles(colors);
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -70,14 +72,14 @@ const Preferences = () => {
         onRequestClose={() => setPickerOpen(false)}
       >
         <TouchableOpacity
-          style={styles.backdrop}
+          style={sheetStyles.backdrop}
           activeOpacity={1}
           onPress={() => setPickerOpen(false)}
         >
           <BlurView intensity={45} tint="dark" style={StyleSheet.absoluteFill} pointerEvents="none" />
-          <TouchableOpacity activeOpacity={1} style={styles.sheet}>
-            <View style={styles.sheetHandle} />
-            <Text style={styles.sheetTitle}>Color theme</Text>
+          <TouchableOpacity activeOpacity={1} style={[sheetStyles.sheet, { maxHeight: "75%" }]}>
+            <View style={sheetStyles.handle} />
+            <Text style={sheetStyles.title}>Color theme</Text>
             <Text style={styles.sheetSubtitle}>
               Each theme has its own light and dark look, the Dark Mode switch
               changes which one is shown.
@@ -129,34 +131,6 @@ const createLocalStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       fontSize: 15,
       fontWeight: "600",
       color: colors.textMuted,
-    },
-    backdrop: {
-      flex: 1,
-      backgroundColor: "rgba(0,0,0,0.2)",
-      justifyContent: "flex-end",
-    },
-    sheet: {
-      backgroundColor: colors.surface,
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      paddingHorizontal: 20,
-      paddingTop: 10,
-      paddingBottom: 32,
-      maxHeight: "75%",
-    },
-    sheetHandle: {
-      width: 36,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: colors.border,
-      alignSelf: "center",
-      marginBottom: 14,
-    },
-    sheetTitle: {
-      fontSize: 20,
-      fontWeight: "800",
-      color: colors.text,
-      marginBottom: 4,
     },
     sheetSubtitle: {
       fontSize: 12,

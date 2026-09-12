@@ -1,4 +1,5 @@
 import DateTimeField from "@/components/DateTimeField";
+import { createModalStyles } from "@/assets/styles/common";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { ColorScheme } from "@/hooks/useTheme";
@@ -58,6 +59,7 @@ export default function TodoEditor({
   const [sound, setSound] = useState<ReminderSound>(initialReminderSound ?? "default");
   const [imageUrl, setImageUrl] = useState<string | null | undefined>(initialImageUrl);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const modalStyles = createModalStyles(colors);
   const styles = createStyles(colors);
   const generateUploadUrl = useMutation(api.todos.generateUploadUrl);
   const setTodoImage = useMutation(api.todos.setTodoImage);
@@ -109,12 +111,12 @@ export default function TodoEditor({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <BlurView intensity={45} tint="dark" style={styles.backdrop}>
-        <View style={styles.card}>
-          <View style={styles.header}>
-            <View style={styles.headerSide} />
-            <Text style={styles.title}>Edit todo</Text>
-            <TouchableOpacity onPress={onClose} style={styles.headerSide}>
+      <BlurView intensity={45} tint="dark" style={modalStyles.backdrop}>
+        <View style={modalStyles.card}>
+          <View style={modalStyles.header}>
+            <View style={modalStyles.headerSide} />
+            <Text style={modalStyles.title}>Edit todo</Text>
+            <TouchableOpacity onPress={onClose} style={modalStyles.headerSide}>
               <Ionicons name="close" size={22} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
@@ -221,31 +223,6 @@ export default function TodoEditor({
 
 const createStyles = (colors: ColorScheme) =>
   StyleSheet.create({
-    backdrop: {
-      flex: 1,
-      backgroundColor: "rgba(0,0,0,0.25)",
-      justifyContent: "center",
-      padding: 24,
-    },
-    card: {
-      backgroundColor: colors.surface,
-      borderRadius: 16,
-      padding: 20,
-    },
-    header: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 16,
-    },
-    title: {
-      fontSize: 28,
-      fontWeight: "900",
-      color: colors.text,
-      flex: 1,
-      textAlign: "center",
-    },
-    headerSide: { width: 22 },
     input: {
       borderWidth: 1,
       borderColor: colors.border,

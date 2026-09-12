@@ -1,6 +1,7 @@
 import DateTimeField from "@/components/DateTimeField";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { createModalStyles } from "@/assets/styles/common";
 import { ColorScheme } from "@/hooks/useTheme";
 import { ReminderSound } from "@/lib/notifications";
 import { uploadImageToConvex } from "@/lib/uploadImage";
@@ -48,6 +49,7 @@ export default function AddTodoModal({
   const [imageId, setImageId] = useState<Id<"_storage"> | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const generateUploadUrl = useMutation(api.todos.generateUploadUrl);
+  const modalStyles = createModalStyles(colors);
   const styles = createStyles(colors);
 
   const handlePickImage = async () => {
@@ -102,12 +104,12 @@ export default function AddTodoModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <BlurView intensity={45} tint="dark" style={styles.backdrop}>
-        <View style={styles.card}>
-          <View style={styles.header}>
-            <View style={styles.headerSide} />
-            <Text style={styles.title}>New todo</Text>
-            <TouchableOpacity onPress={onClose} style={styles.headerSide}>
+      <BlurView intensity={45} tint="dark" style={modalStyles.backdrop}>
+        <View style={modalStyles.card}>
+          <View style={modalStyles.header}>
+            <View style={modalStyles.headerSide} />
+            <Text style={modalStyles.title}>New todo</Text>
+            <TouchableOpacity onPress={onClose} style={modalStyles.headerSide}>
               <Ionicons name="close" size={22} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
@@ -196,31 +198,6 @@ export default function AddTodoModal({
 
 const createStyles = (colors: ColorScheme) =>
   StyleSheet.create({
-    backdrop: {
-      flex: 1,
-      backgroundColor: "rgba(0,0,0,0.25)",
-      justifyContent: "center",
-      padding: 24,
-    },
-    card: {
-      backgroundColor: colors.surface,
-      borderRadius: 16,
-      padding: 20,
-    },
-    header: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 16,
-    },
-    title: {
-      fontSize: 18,
-      fontWeight: "700",
-      color: colors.text,
-      flex: 1,
-      textAlign: "center",
-    },
-    headerSide: { width: 22 },
     input: {
       borderWidth: 1,
       borderColor: colors.border,

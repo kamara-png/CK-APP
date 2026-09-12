@@ -1,3 +1,4 @@
+import { createModalStyles } from "@/assets/styles/common";
 import { ColorScheme } from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -22,6 +23,7 @@ interface HabitEditorProps {
 export default function HabitEditor({ visible, colors, onSave, onClose }: HabitEditorProps) {
   const [name, setName] = useState("");
   const [color, setColor] = useState(PRESET_COLORS[0]);
+  const modalStyles = createModalStyles(colors);
   const styles = createStyles(colors);
 
   const handleSave = () => {
@@ -34,12 +36,12 @@ export default function HabitEditor({ visible, colors, onSave, onClose }: HabitE
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <BlurView intensity={45} tint="dark" style={styles.backdrop}>
-        <View style={styles.card}>
-          <View style={styles.header}>
-            <View style={styles.headerSide} />
-            <Text style={styles.title}>New streak</Text>
-            <TouchableOpacity onPress={onClose} style={styles.headerSide}>
+      <BlurView intensity={45} tint="dark" style={modalStyles.backdrop}>
+        <View style={modalStyles.card}>
+          <View style={modalStyles.header}>
+            <View style={modalStyles.headerSide} />
+            <Text style={modalStyles.title}>New streak</Text>
+            <TouchableOpacity onPress={onClose} style={modalStyles.headerSide}>
               <Ionicons name="close" size={22} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
@@ -83,31 +85,6 @@ export default function HabitEditor({ visible, colors, onSave, onClose }: HabitE
 
 const createStyles = (colors: ColorScheme) =>
   StyleSheet.create({
-    backdrop: {
-      flex: 1,
-      backgroundColor: "rgba(0,0,0,0.25)",
-      justifyContent: "center",
-      padding: 24,
-    },
-    card: {
-      backgroundColor: colors.surface,
-      borderRadius: 16,
-      padding: 20,
-    },
-    header: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 16,
-    },
-    title: {
-      fontSize: 18,
-      fontWeight: "700",
-      color: colors.text,
-      flex: 1,
-      textAlign: "center",
-    },
-    headerSide: { width: 22 },
     label: {
       fontSize: 13,
       fontWeight: "600",

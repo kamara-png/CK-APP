@@ -1,3 +1,4 @@
+import { createModalStyles, createSheetStyles } from "@/assets/styles/common";
 import ColorPicker from "@/components/ColorPicker";
 import EdgeSwipeBack from "@/components/EdgeSwipeBack";
 import FormattingToolbar, {
@@ -206,6 +207,8 @@ export default function NoteEditorScreen() {
     ]);
   };
 
+  const modalStyles = createModalStyles(colors);
+  const sheetStyles = createSheetStyles(colors);
   const styles = createStyles(colors);
 
   if (note === undefined) {
@@ -401,7 +404,7 @@ export default function NoteEditorScreen() {
         onRequestClose={() => setOptionsOpen(false)}
       >
         <TouchableOpacity
-          style={styles.pickerBackdrop}
+          style={sheetStyles.backdrop}
           activeOpacity={1}
           onPress={() => setOptionsOpen(false)}
         >
@@ -411,9 +414,9 @@ export default function NoteEditorScreen() {
             style={StyleSheet.absoluteFill}
             pointerEvents="none"
           />
-          <TouchableOpacity activeOpacity={1} style={styles.optionsSheet}>
-            <View style={styles.sheetHandle} />
-            <Text style={styles.pickerTitle}>Note Options</Text>
+          <TouchableOpacity activeOpacity={1} style={sheetStyles.sheet}>
+            <View style={sheetStyles.handle} />
+            <Text style={sheetStyles.title}>Note Options</Text>
 
             <Text style={styles.optionsLabel}>Color</Text>
             <View style={styles.colorRow}>
@@ -484,14 +487,14 @@ export default function NoteEditorScreen() {
         animationType="fade"
         onRequestClose={() => setCustomPickerOpen(false)}
       >
-        <BlurView intensity={45} tint="dark" style={styles.pickerBackdrop}>
-          <View style={styles.pickerCard}>
-            <View style={styles.pickerHeader}>
-              <View style={styles.pickerHeaderSide} />
-              <Text style={styles.pickerTitle}>Pick a color</Text>
+        <BlurView intensity={45} tint="dark" style={modalStyles.backdrop}>
+          <View style={[modalStyles.card, { alignItems: "center" }]}>
+            <View style={modalStyles.header}>
+              <View style={modalStyles.headerSide} />
+              <Text style={modalStyles.title}>Pick a color</Text>
               <TouchableOpacity
                 onPress={() => setCustomPickerOpen(false)}
-                style={styles.pickerHeaderSide}
+                style={modalStyles.headerSide}
               >
                 <Ionicons name="close" size={22} color={colors.textMuted} />
               </TouchableOpacity>
@@ -593,21 +596,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     customSwatch: {
       borderStyle: "dashed",
     },
-    optionsSheet: {
-      backgroundColor: colors.surface,
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      padding: 20,
-      paddingBottom: 36,
-    },
-    sheetHandle: {
-      width: 36,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: colors.border,
-      alignSelf: "center",
-      marginBottom: 14,
-    },
     optionsLabel: {
       fontSize: 13,
       fontWeight: "600",
@@ -629,33 +617,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       fontSize: 16,
       fontWeight: "600",
     },
-    pickerBackdrop: {
-      flex: 1,
-      backgroundColor: "rgba(0,0,0,0.2)",
-      justifyContent: "center",
-      padding: 24,
-    },
-    pickerCard: {
-      backgroundColor: colors.surface,
-      borderRadius: 16,
-      padding: 20,
-      alignItems: "center",
-    },
-    pickerHeader: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 16,
-      width: "100%",
-    },
-    pickerTitle: {
-      fontSize: 17,
-      fontWeight: "700",
-      color: colors.text,
-      flex: 1,
-      textAlign: "center",
-    },
-    pickerHeaderSide: { width: 22 },
     doneButton: {
       marginTop: 16,
       borderRadius: 10,

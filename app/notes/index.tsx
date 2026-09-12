@@ -2,6 +2,7 @@ import EdgeSwipeBack from "@/components/EdgeSwipeBack";
 import SwipeableRow from "@/components/SwipeableRow";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { createFabStyle } from "@/assets/styles/common";
 import useTheme from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
@@ -40,6 +41,7 @@ export default function NotesListScreen() {
   const createNote = useMutation(api.notes.createNote);
   const deleteNote = useMutation(api.notes.deleteNote);
   const [search, setSearch] = useState("");
+  const fabStyles = createFabStyle(colors);
   const styles = createStyles(colors);
 
   const filtered = useMemo(() => {
@@ -145,7 +147,7 @@ export default function NotesListScreen() {
         />
       )}
       <TouchableOpacity
-        style={[styles.fab, { backgroundColor: colors.primary }]}
+        style={[fabStyles.fab, { bottom: 108, zIndex: 20 }]}
         onPress={handleCreate}
       >
         <Ionicons name="add" size={30} color="#fff" />
@@ -224,20 +226,4 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       marginTop: 8,
     },
     list: { paddingBottom: 180 },
-    fab: {
-      position: "absolute",
-      right: 20,
-      bottom: 108,
-      zIndex: 20,
-      width: 58,
-      height: 58,
-      borderRadius: 18,
-      alignItems: "center",
-      justifyContent: "center",
-      elevation: 6,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.3,
-      shadowRadius: 5,
-    },
   });
